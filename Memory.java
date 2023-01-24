@@ -1,3 +1,5 @@
+import java.lang.System.Logger.Level;
+
 public interface Memory{
     /*
      * A changer a votre discretion ( remplacer path par un class qui encapsule tout le fichier je l'est connais pas :/)
@@ -5,13 +7,13 @@ public interface Memory{
      * 
      * Note : Cette class pourait etre abstract pour avoir une autre classe niveaux
      */
-    public Cells[][] loadFromFile(String path);
+    public Level loadFromFile(String path);
 
     /*
      * Interessant pour la recurence(niveaux dans des niveaux)
      */
 
-    public Cells[][] rLoadFromFile(String path, int depth);
+    public Level rLoadFromFile(String path, int depth);
 
      /*
       * Savoir combien de niveaux dans ce niveaux
