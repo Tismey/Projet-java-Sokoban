@@ -5,7 +5,7 @@ public interface Memory{
      * A changer a votre discretion ( remplacer path par un class qui encapsule tout le fichier je l'est connais pas :/)
      * interface pour la partie memoire
      * 
-     * Note : Cette class pourait etre abstract pour avoir une autre classe niveaux
+     * Note : Cette class pourra etre abstract pour avoir une autre classe niveaux
      */
     public Level loadFromFile(String path);
 
