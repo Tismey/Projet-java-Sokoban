@@ -22,6 +22,10 @@ public interface level{
 
     public boolean remove(Moveable mv);
 
+    public boolean winConditionMet();
+
+    public Coords playerSpawn();
+
 
 
 }
