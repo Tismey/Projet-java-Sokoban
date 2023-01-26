@@ -7,10 +7,10 @@
 
 public enum Cells {
 
-    SOL,
     MUR,
     BOITE,
     JOUEUR,
+    VIDE,
     NIVEAUX,
     SORTIE,
 
