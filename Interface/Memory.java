@@ -7,13 +7,13 @@ public interface Memory{
      * 
      * Note : Cette class pourra etre abstract pour avoir une autre classe niveaux
      */
-    public Level loadFromFile(String path);
+    public void loadFromFile(String path);
 
     /*
      * Interessant pour la recurence(niveaux dans des niveaux)
      */
 
-    public Level rLoadFromFile(String path, int depth);
+    public void rLoadFromFile(String path, int depth);
 
      /*
       * Savoir combien de niveaux dans ce niveaux
