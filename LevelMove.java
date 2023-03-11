@@ -3,32 +3,58 @@ import java.util.*;
 import java.lang.*;
 
 public class LevelMove {
-	private Cells[][] matrice;
+	private int[][] matrice;
 	private int taille;
-	private CoordSet playerTarget;
-	private ArrayList<CoordSet> boxTarget;
+//	private CoordSet playerTarget;
+//	private ArrayList<CoordSet> boxTarget;
+	private ArrayList<CoordSet> listTarget;
+	private int outsideWorld;
+	private int worldNum;
 
 	public LevelMove(int tailleMatrice) {
-		this.matrice = new Cells[tailleMatrice][tailleMatrice];
+		this.matrice = new int[tailleMatrice][tailleMatrice];
 		this.taille = tailleMatrice;
-		this.boxTarget = new ArrayList<CoordSet>();
+	//	this.boxTarget = new ArrayList<CoordSet>();
+	//	this.playerTarget = new CoordSet(-1, -1);
+		this.outsideWorld = 0;
+		this.worldNum = 0;
 	}
 
-	public void displayInTerminal() {
+	public LevelMove(int [][] data, int tailleMatrice, int numMonde, int outsideWorld, ArrayList<CoordSet> listTarget) {
+		this.matrice = new int[tailleMatrice][tailleMatrice];
+		this.taille = tailleMatrice;
+	//	this.boxTarget = new ArrayList<CoordSet>(listTarget);
+	//	this.playerTarget = new CoordSet(-1, -1);
+		this.listTarget = new ArrayList<CoordSet>(listTarget);
+		this.outsideWorld = outsideWorld;
+		this.worldNum = numMonde;
+
 		int i, j;
+
+		for (i = 0; i < tailleMatrice; i++) {
+			for (j = 0; j < tailleMatrice; j++) {
+				matrice[i][j] = data[i][j];
+			}
+		}
+	}
+
+	public void displayInTerminal(LevelData data) {
+		int i, j;
+		CoordSet coord;
 
 		for (i = 0; i < this.getSizeMat(); i++) {
 			for (j = 0; j < this.getSizeMat(); j++) {
 				if (this.matrice[i][j] == Cells.JOUEUR) {
-					if (getPlayerTarget().getX() == i && getPlayerTarget().getY() == j) {
+					coord = new CoordSet(i, j);
+					if (getListTarget().contains(coord)) {
 						System.out.print("a");
 						continue;
 					}
 					System.out.print("A");
 				}
 				if (this.matrice[i][j] == Cells.BOITE) {
-					CoordSet coord1 = new CoordSet(i, j);
-					if (getBoxTarget().contains(coord1)) {
+					coord = new CoordSet(i, j);
+					if (getListTarget().contains(coord)) {
 						System.out.print("b");
 						continue;
 					}
@@ -39,16 +65,20 @@ public class LevelMove {
 					System.out.print("#");
 				}
 				if (this.matrice[i][j] == Cells.VIDE) {
-					CoordSet coord2 = new CoordSet(i, j);
-					if (getPlayerTarget().getX() == i && getPlayerTarget().getY() == j) {
-						System.out.print("&");
-						continue;
-					}
-					if (getBoxTarget().contains(coord2)) {
+					coord = new CoordSet(i, j);
+					if (getListTarget().contains(coord)) {
 						System.out.print("@");
 						continue;
 					}
 					System.out.print(" ");
+				}
+				if (isAWorld(i, j)) {
+					coord = new CoordSet(i, j);
+					if (getListTarget().contains(coord)) {
+						System.out.print((char) (data.getName(matrice[i][j]) + 32));
+						continue;
+					}
+					System.out.print(data.getName(matrice[i][j]));
 				}
 			}
 			System.out.println("");
@@ -61,20 +91,86 @@ public class LevelMove {
 
 		for (i = 0; i < this.getSizeMat(); i++) {
 			for (j = 0; j < this.getSizeMat(); j++) {
+				if (i == getSizeMat() / 2 && j == 0) {
+					this.matrice[i][j] = Cells.VIDE;
+					continue;
+				}
+
 				if (i == 0 || i == this.getSizeMat() - 1 || j == 0 || j == this.getSizeMat() - 1) {
 					this.matrice[i][j] = Cells.MUR;
 				}
 				else
 					this.matrice[i][j] = Cells.VIDE;
+				
 			}
 		}
 
-        this.matrice[this.getSizeMat()/2 - 1][this.getSizeMat()/2 - 1] = Cells.JOUEUR;
-        this.matrice[this.getSizeMat()/2 - 1][this.getSizeMat()/2] = Cells.BOITE;
-        this.matrice[this.getSizeMat()/2 - 1][this.getSizeMat()/2 + 1] = Cells.BOITE;
+        this.matrice[this.getSizeMat()/2 - 1][this.getSizeMat()/2] = Cells.JOUEUR;
+        this.matrice[this.getSizeMat()/2 - 1][this.getSizeMat()/2 + 1] = Cells.mondeNum(0);
+/*
+        this.matrice[this.getSizeMat()/2 - 1][this.getSizeMat()/2 - 1] = Cells.BOITE;
+        this.matrice[this.getSizeMat()/2 + 1][this.getSizeMat()/2 - 1] = Cells.mondeNum(3);
+        this.matrice[this.getSizeMat()/2][this.getSizeMat()/2 - 1] = Cells.BOITE;
+        
+        this.matrice[this.getSizeMat()/2 - 1][this.getSizeMat()/2] = Cells.mondeNum(1);
+        this.matrice[this.getSizeMat()/2 - 2][this.getSizeMat()/2 - 1] = Cells.mondeNum(2);
+*/
+        //putPlayerTarget(1, 1);
+        //boxTarget.add(new CoordSet(1, 4));
+	}
 
-        putPlayerTarget(5, 2);
-        boxTarget.add(new CoordSet(1, 4));
+	public void initBoite(int numVal) {
+		int i, j, n = this.getSizeMat();
+
+		for (i = 0; i < n; i++) {
+			for (j = 0; j < n; j++) {
+				if (i == n/2 && (j == 0 || j == n - 1)) {
+					this.matrice[i][j] = Cells.VIDE;
+					continue; 
+				}
+				if (i == 0 && j == n/2) {
+					this.matrice[i][j] = Cells.VIDE;
+					continue;
+				}
+				if (i == n - 1 && j == n/2) {
+					this.matrice[i][j] = Cells.VIDE;
+					continue;
+				}
+
+				if (i == 0 || i == n - 1 || j == 0 || j == n - 1) {
+					this.matrice[i][j] = Cells.MUR;
+				}
+				else
+					this.matrice[i][j] = Cells.VIDE;
+				
+				/*
+				if (i == getSizeMat() / 2 - 1 && (j == getSizeMat()/2 - 1 || j == getSizeMat()/2 || j == getSizeMat()/2 + 1)) {
+					matrice[i][j] = Cells.VIDE;
+				}
+				else if (i == getSizeMat() / 2 && (j == getSizeMat()/2 - 1 || j == getSizeMat()/2 || j == getSizeMat()/2 + 1)) {
+					matrice[i][j] = Cells.VIDE;
+				}
+				else if (i == getSizeMat() / 2 + 1 && (j == getSizeMat()/2 - 1 || j == getSizeMat()/2 || j == getSizeMat()/2 + 1)) {
+					matrice[i][j] = Cells.VIDE;
+				}
+				else if (i == getSizeMat() / 2 || j == getSizeMat() / 2) {
+					matrice[i][j] = Cells.VIDE;
+				}
+				else
+					matrice[i][j] = Cells.MUR;*/
+				/*
+				if (i == getSizeMat() - 1 && j == getSizeMat() / 2) {
+					this.matrice[i][j] = Cells.VIDE;
+				}
+				else
+					this.matrice[i][j] = Cells.MUR;*/
+			}
+		}
+
+		this.outsideWorld = 0;
+		this.worldNum = numVal;
+
+		//putPlayerTarget(n - 2, n - 2);
 	}
 
 	public boolean checkForMove(CoordSet o, Direction d) {
@@ -195,8 +291,12 @@ public class LevelMove {
 	}
 
 
-	public Cells[][] getLevelData() {
+	public int[][] getLevelData() {
 		return this.matrice;
+	}
+
+	public int getLevelData(int x, int y) {
+		return this.matrice[x][y];
 	}
 
 	public int getSizeMat() {
@@ -213,20 +313,20 @@ public class LevelMove {
     			}
     		}
     	}
-    	return new CoordSet(-1, -1);
+    	return new CoordSet(-2, -2);
     }
 
     public boolean winConditionMet() {
     	int i;
 
-    	for (i = 0; i < getBoxTarget().size(); i++) {
-    		if (matrice[getBoxTarget().get(i).getX()][getBoxTarget().get(i).getY()] != Cells.BOITE) {
+		for (i = 0; i < getListTarget().size(); i++) {
+    		if (matrice[getListTarget().get(i).getX()][getListTarget().get(i).getY()] == Cells.VIDE) {
     			return false;
     		}
     	}
-    	return playerSpawn().equals(getPlayerTarget());
+    	return true;
     }
-
+/*
     public void putPlayerTarget(int x, int y) {
     	this.playerTarget = new CoordSet(x, y);  
     }
@@ -238,27 +338,63 @@ public class LevelMove {
     public ArrayList<CoordSet> getBoxTarget() {
     	return this.boxTarget;
     }
+*/
+    public ArrayList<CoordSet> getListTarget() {
+    	return this.listTarget;
+    }
+
+    public boolean isAWorld(int x, int y) {
+    	if (this.matrice[x][y] >= 0) {
+    		return true;
+    	}
+    	return false;
+    }
+
+    public int getOutsideWorld() {
+    	return this.outsideWorld;
+    }
+
+     public void setOutsideWorld(int val) {
+    	this.outsideWorld = val;
+    }
+
+    public int getWorldNum() {
+    	return this.worldNum;
+    }
+
+    public CoordSet getPosWorld(int numWorld) {
+    	int i, j;
+
+    	for (i = 0; i < getSizeMat(); i++) {
+    		for (j = 0; j < getSizeMat(); j++) {
+    			if (matrice[i][j] == numWorld) {
+    				return new CoordSet(i, j);
+    			}
+    		}
+    	}
+    	return new CoordSet(-3, -3);
+    }
 
     public void swapEnHaut(CoordSet c) {
-    	Cells tmp = matrice[c.getX()][c.getY()];
+    	int tmp = matrice[c.getX()][c.getY()];
     	matrice[c.getX()][c.getY()] = matrice[c.getX() - 1][c.getY()];
     	matrice[c.getX() - 1][c.getY()] = tmp;
     }
 
     public void swapEnBas(CoordSet c) {
-    	Cells tmp = matrice[c.getX()][c.getY()];
+    	int tmp = matrice[c.getX()][c.getY()];
     	matrice[c.getX()][c.getY()] = matrice[c.getX() + 1][c.getY()];
     	matrice[c.getX() + 1][c.getY()] = tmp;
     }
     
     public void swapAGauche(CoordSet c) {
-    	Cells tmp = matrice[c.getX()][c.getY()];
+    	int tmp = matrice[c.getX()][c.getY()];
     	matrice[c.getX()][c.getY()] = matrice[c.getX()][c.getY() - 1];
     	matrice[c.getX()][c.getY() - 1] = tmp;
     }
     
     public void swapADroite(CoordSet c) {
-    	Cells tmp = matrice[c.getX()][c.getY()];
+    	int tmp = matrice[c.getX()][c.getY()];
     	matrice[c.getX()][c.getY()] = matrice[c.getX()][c.getY() + 1];
     	matrice[c.getX()][c.getY() + 1] = tmp;
     }
