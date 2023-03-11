@@ -23,6 +23,11 @@ public class CoordSet {
     	this.y += p;
     }
 
+    public void chgCoord(int x, int y) {
+        this.x = x;
+        this.y = y;
+    }
+
     public boolean equals(Object o) {
     	if (!(o instanceof CoordSet)) {
     		return false;
