@@ -4,14 +4,24 @@
  * 
  */
 
-
+/*
 public enum Cells {
 
-    MUR,
-    BOITE,
-    JOUEUR,
+    MUR, 
+    BOITE, 
+    JOUEUR, 
     VIDE,
-    NIVEAUX,
-    SORTIE,
+    MONDE,
+}
+*/
 
+public abstract class Cells {
+	public static final int MUR = -1; 
+	public static final int BOITE = -2; 
+	public static final int VIDE = -3; 
+	public static final int JOUEUR = -4;
+
+	public static int mondeNum(int val) {
+		return val;
+	} 
 }
