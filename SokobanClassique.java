@@ -21,19 +21,19 @@ public class SokobanClassique {
 			switch (cl) {
 				case "h" : 
 					if (mat.checkForMove(mat.playerSpawn(), Direction.GAUCHE)) 
-						mat.move(mat.playerSpawn(), Direction.GAUCHE);
+						
 					break;
 				case "k" : 
 					if (mat.checkForMove(mat.playerSpawn(), Direction.HAUT)) 
-						mat.move(mat.playerSpawn(), Direction.HAUT);
+						
 					break;
 				case "l" : 
 					if (mat.checkForMove(mat.playerSpawn(), Direction.DROITE))
-						mat.move(mat.playerSpawn(), Direction.DROITE);
+						
 					break;
 				case "j" : 
 					if (mat.checkForMove(mat.playerSpawn(), Direction.BAS)) 
-						mat.move(mat.playerSpawn(), Direction.BAS);					
+								
 					break;
 				default : System.out.println("Mauvaise touche !");	
 			}

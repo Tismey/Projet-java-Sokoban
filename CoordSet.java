@@ -28,6 +28,26 @@ public class CoordSet {
         this.y = y;
     }
 
+	public static CoordSet DirToVec(Direction d){
+		if (d == Direction.HAUT) {
+			return new CoordSet(0, 1);
+		}
+		if (d == Direction.BAS) {
+			return new CoordSet(0, -1);
+		}
+		if (d == Direction.GAUCHE) {
+			return new CoordSet(1, 0);
+		}
+		if (d == Direction.DROITE) {
+			return new CoordSet(-1, 0);
+		}
+		return new CoordSet(0, 0);
+	}
+
+	public static CoordSet AddVec(CoordSet a, CoordSet b){
+		return new CoordSet(a.getX() + b.getX(), a.getY() + b.getY());
+	}
+
     public boolean equals(Object o) {
     	if (!(o instanceof CoordSet)) {
     		return false;
