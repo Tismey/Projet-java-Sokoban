@@ -30,16 +30,16 @@ public class CoordSet {
 
 	public static CoordSet DirToVec(Direction d){
 		if (d == Direction.HAUT) {
-			return new CoordSet(0, 1);
+			return new CoordSet(-1, 0);
 		}
 		if (d == Direction.BAS) {
-			return new CoordSet(0, -1);
+			return new CoordSet(1,0);
 		}
 		if (d == Direction.GAUCHE) {
-			return new CoordSet(1, 0);
+			return new CoordSet(0, -1);
 		}
 		if (d == Direction.DROITE) {
-			return new CoordSet(-1, 0);
+			return new CoordSet(0, 1);
 		}
 		return new CoordSet(0, 0);
 	}
@@ -57,4 +57,19 @@ public class CoordSet {
 
     	return ((getX() == autre.getX()) && (getY() == autre.getY()));
     }
+	public static Direction revDirection(Direction d){
+        if (d == Direction.HAUT) {
+			return Direction.BAS;
+		}
+		if (d == Direction.BAS) {
+			return Direction.HAUT;
+		}
+		if (d == Direction.GAUCHE) {
+			return Direction.DROITE;
+		}
+		if (d == Direction.DROITE) {
+			return Direction.GAUCHE;
+		}
+		return Direction.NODIRECTION;
+    } 
 }

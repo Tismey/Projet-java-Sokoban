@@ -398,4 +398,19 @@ public class LevelMove {
     	matrice[c.getX()][c.getY()] = matrice[c.getX()][c.getY() + 1];
     	matrice[c.getX()][c.getY() + 1] = tmp;
     }
+
+	public CoordSet EnterPos(Diretion d){
+		if (d == Direction.HAUT) {
+			return CoordSet(getSizeMat() - 1, getSizeMat()/2);
+		}
+		if (d == Direction.BAS) {
+			return CoordSet(0, getSizeMat()/2);
+		}
+		if (d == Direction.GAUCHE) {
+			return CoordSet(getSizeMat()/2, getSizeMat() - 1);
+		}
+		if (d == Direction.DROITE) {
+			return CoordSet(getSizeMat() /2, 0);
+		}
+	}
 }

@@ -15,29 +15,65 @@ public class Univers {
 		this.taille = taille;
 	}
 
+	public boolean checkOutside(CoordSet o, Direction d, LevelMove l){
+		LevelMove lOut = univ.get(l.getOutsideWorld());
+		if(!lOut.checkForMove(CoordSet.AddVec(lOut.getPosWorld(l.getWorldNum()), CoordSet.DirToVec(d)))){
+			return false;
+		}
+		moveOutside(o,d, l);
+		return true;
+
+	}
+
+	public void moveOutside(CoordSet o, Direction d, LevelMove l){
+		LevelMove lOut = univ.get(l.getOutsideWorld());
+		CoordSet nextspot = CoordSet.AddVec(o, CoordSet.DirToVec(d));
+		int[][] tpmat = l.getLevelData();
+		int[][] tpmatOut = lOut.getLevelData();
+		CoordSet ctmp = CoordSet.AddVec(lOut.getPosWorld(l.getWorldNum()), CoordSet.DirToVec(d));
+		int tmp = tpmat[o.getX()][o.getY()];
+		tpmat[o.getX()][o.getY()] = Cells.VIDE;
+		tpmatOut[ctmp.getX()][ctmp.getY()] = tmp; 
+	}
+
+	public boolean checkInside(CoordSet o, Direction d, LevelMove l, int monde){
+		LevelMove lIn = univ.get(l.getLevelData(o.getX(), o.getY()));
+		if(!lIn.checkForMove(lIn.EnterPos(d),d)){
+			return false;
+		}
+		moveOutside(o,d, l);
+		return true;
+
+	}
+
+	public void moveInside(CoordSet o, Direction d, LevelMove l){
+		LevelMove lIn = univ.get(l.getLevelData(o.getX(), o.getY()));;
+		CoordSet nextspot = CoordSet.AddVec(o, CoordSet.DirToVec(d));
+		int[][] tpmat = l.getLevelData();
+		int[][] tpmatIn = lIn.getLevelData();
+		CoordSet ctmp = CoordSet.AddVec(o, CoordSet.DirToVec(CoordSet.revDirection(d)));
+		int tmp = tpmat[o.getX()][o.getY()];
+		tpmat[o.getX()][o.getY()] = Cells.VIDE;
+		tpmatIn[ctmp.getX()][ctmp.getY()] = tmp; 
+	}
+
+
+
+
 	public boolean checkMovePossible(CoordSet o, Direction d, LevelMove l) {
 		int [][] tmpMat = l.getLevelData();
 		LevelMove tmpL;
 		CoordSet tmpCoord, tmpCoord2 = new CoordSet(o.getX(), o.getY());
 
-		if (o.getX() == -1) {
-			o.addToX(1);
-		}
-		if (o.getX() == l.getSizeMat()) {
-			o.addToX(-1);
-		}
-		if (o.getY() == -1) {
-			o.addToY(1);
-		}
-		if (o.getY() == l.getSizeMat()) {
-			o.addToY(-1);
-		}
 
-		if (tmpMat[o.getX()][o.getY()] == Cells.MUR) {
-			return false;
-		}
-		else if (tmpMat[o.getX()][o.getY()] == Cells.VIDE) {
+		if(l.checkForMove(o,d)){
 			return true;
+		}
+		CoordSet nextspot = CoordSet.AddVec(o, CoordSet.DirToVec(d));
+		if(tmpMat[nextspot.getX()][nextspot.getY()] >= 0){
+			if(!checkMovePossible(nextspot, null, l)){
+
+			}
 		}
 
 		if (d == Direction.HAUT && o.getX() == 0) {

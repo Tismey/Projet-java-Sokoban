@@ -148,11 +148,12 @@ public class LevelMoveV2 {
 		if (matrice[nextSpot.getX()][nextSpot.getY()] == Cells.MUR) {
 			return false;
 		}
-		if (matrice[nextSpot.getX()][nextSpot.getY()] == Cells.BOITE) {
+		if (matrice[nextSpot.getX()][nextSpot.getY()] == Cells.BOITE || matrice[nextSpot.getX()][nextSpot.getY()] >= 0) {
 			if(!checkForMove(nextSpot, d)){
 				return false;
 			}
 		}
+
 		
 		move(o, d);
 		return true;
