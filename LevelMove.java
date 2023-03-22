@@ -5,8 +5,6 @@ import java.lang.*;
 public class LevelMove {
 	private int[][] matrice;
 	private int taille;
-//	private CoordSet playerTarget;
-//	private ArrayList<CoordSet> boxTarget;
 	private ArrayList<CoordSet> listTarget;
 	private int outsideWorld;
 	private int worldNum;
@@ -14,8 +12,6 @@ public class LevelMove {
 	public LevelMove(int tailleMatrice) {
 		this.matrice = new int[tailleMatrice][tailleMatrice];
 		this.taille = tailleMatrice;
-	//	this.boxTarget = new ArrayList<CoordSet>();
-	//	this.playerTarget = new CoordSet(-1, -1);
 		this.outsideWorld = 0;
 		this.worldNum = 0;
 	}
@@ -23,8 +19,6 @@ public class LevelMove {
 	public LevelMove(int [][] data, int tailleMatrice, int numMonde, int outsideWorld, ArrayList<CoordSet> listTarget) {
 		this.matrice = new int[tailleMatrice][tailleMatrice];
 		this.taille = tailleMatrice;
-	//	this.boxTarget = new ArrayList<CoordSet>(listTarget);
-	//	this.playerTarget = new CoordSet(-1, -1);
 		this.listTarget = new ArrayList<CoordSet>(listTarget);
 		this.outsideWorld = outsideWorld;
 		this.worldNum = numMonde;
@@ -38,6 +32,9 @@ public class LevelMove {
 		}
 	}
 
+	/*
+		Affiche sur le terminal une représentation en ASCII du niveau
+	*/
 	public void displayInTerminal(LevelData data) {
 		int i, j;
 		CoordSet coord;
@@ -86,331 +83,179 @@ public class LevelMove {
 		System.out.println("");
 	}
 
-	public void initMatrice() {
-		int i, j;
-
-		for (i = 0; i < this.getSizeMat(); i++) {
-			for (j = 0; j < this.getSizeMat(); j++) {
-				if (i == getSizeMat() / 2 && j == 0) {
-					this.matrice[i][j] = Cells.VIDE;
-					continue;
-				}
-
-				if (i == 0 || i == this.getSizeMat() - 1 || j == 0 || j == this.getSizeMat() - 1) {
-					this.matrice[i][j] = Cells.MUR;
-				}
-				else
-					this.matrice[i][j] = Cells.VIDE;
-				
-			}
-		}
-
-        this.matrice[this.getSizeMat()/2 - 1][this.getSizeMat()/2] = Cells.JOUEUR;
-        this.matrice[this.getSizeMat()/2 - 1][this.getSizeMat()/2 + 1] = Cells.mondeNum(0);
-/*
-        this.matrice[this.getSizeMat()/2 - 1][this.getSizeMat()/2 - 1] = Cells.BOITE;
-        this.matrice[this.getSizeMat()/2 + 1][this.getSizeMat()/2 - 1] = Cells.mondeNum(3);
-        this.matrice[this.getSizeMat()/2][this.getSizeMat()/2 - 1] = Cells.BOITE;
-        
-        this.matrice[this.getSizeMat()/2 - 1][this.getSizeMat()/2] = Cells.mondeNum(1);
-        this.matrice[this.getSizeMat()/2 - 2][this.getSizeMat()/2 - 1] = Cells.mondeNum(2);
-*/
-        //putPlayerTarget(1, 1);
-        //boxTarget.add(new CoordSet(1, 4));
-	}
-
-	public void initBoite(int numVal) {
-		int i, j, n = this.getSizeMat();
-
-		for (i = 0; i < n; i++) {
-			for (j = 0; j < n; j++) {
-				if (i == n/2 && (j == 0 || j == n - 1)) {
-					this.matrice[i][j] = Cells.VIDE;
-					continue; 
-				}
-				if (i == 0 && j == n/2) {
-					this.matrice[i][j] = Cells.VIDE;
-					continue;
-				}
-				if (i == n - 1 && j == n/2) {
-					this.matrice[i][j] = Cells.VIDE;
-					continue;
-				}
-
-				if (i == 0 || i == n - 1 || j == 0 || j == n - 1) {
-					this.matrice[i][j] = Cells.MUR;
-				}
-				else
-					this.matrice[i][j] = Cells.VIDE;
-				
-				/*
-				if (i == getSizeMat() / 2 - 1 && (j == getSizeMat()/2 - 1 || j == getSizeMat()/2 || j == getSizeMat()/2 + 1)) {
-					matrice[i][j] = Cells.VIDE;
-				}
-				else if (i == getSizeMat() / 2 && (j == getSizeMat()/2 - 1 || j == getSizeMat()/2 || j == getSizeMat()/2 + 1)) {
-					matrice[i][j] = Cells.VIDE;
-				}
-				else if (i == getSizeMat() / 2 + 1 && (j == getSizeMat()/2 - 1 || j == getSizeMat()/2 || j == getSizeMat()/2 + 1)) {
-					matrice[i][j] = Cells.VIDE;
-				}
-				else if (i == getSizeMat() / 2 || j == getSizeMat() / 2) {
-					matrice[i][j] = Cells.VIDE;
-				}
-				else
-					matrice[i][j] = Cells.MUR;*/
-				/*
-				if (i == getSizeMat() - 1 && j == getSizeMat() / 2) {
-					this.matrice[i][j] = Cells.VIDE;
-				}
-				else
-					this.matrice[i][j] = Cells.MUR;*/
-			}
-		}
-
-		this.outsideWorld = 0;
-		this.worldNum = numVal;
-
-		//putPlayerTarget(n - 2, n - 2);
-	}
-
+	/**
+		Renvoie true si le mouvement du Cell sur les coordonnées o vers la direction d est possible
+		Sinon renvoie false
+	*/
 	public boolean checkForMove(CoordSet o, Direction d) {
-		if (matrice[o.getX()][o.getY()] == Cells.MUR) {
+		if (matrice[o.getX()][o.getY()] == Cells.MUR)
 			return false;
-		}
 
-		if (d == Direction.HAUT && (matrice[o.getX() - 1][o.getY()] == Cells.MUR)) {
+		if (matrice[o.getAddToXWithDir(d)][o.getAddToYWithDir(d)] == Cells.MUR)
 			return false;
-		}
-		if (d == Direction.BAS && (matrice[o.getX() + 1][o.getY()] == Cells.MUR)) {
-			return false;
-		}
-		if (d == Direction.GAUCHE && (matrice[o.getX()][o.getY() - 1] == Cells.MUR)) {
-			return false;
-		}
-		if (d == Direction.DROITE && (matrice[o.getX()][o.getY() + 1] == Cells.MUR)) {
-			return false;
-		}
-
 		return true;
 	}
 
+	/**
+		Effectue les mouvements à partir de les coordonnées o (position du joueur) vers la direction d
+	*/
 	public void move(CoordSet o, Direction d) {
-		if (d == Direction.HAUT && matrice[o.getX() - 1][o.getY()] == Cells.BOITE) {
-			o.addToX(-1);
-
-			while (matrice[o.getX() - 1][o.getY()] == Cells.BOITE) {
-				o.addToX(-1);
-			}
-
-			if (!checkForMove(o, d)) {
+		if (matrice[o.getAddToXWithDir(d)][o.getAddToYWithDir(d)] == Cells.BOITE) {
+			while (matrice[o.getAddToXWithDir(d)][o.getAddToYWithDir(d)] == Cells.BOITE)
+				o.addToCoordWithDir(d);
+			if (!checkForMove(o, d))
 				return;
+			swapToDir(o, d);
+			while (matrice[o.getAddToXWithDir(CoordSet.revDirection(d))][o.getAddToYWithDir(CoordSet.revDirection(d))] != Cells.JOUEUR){
+				swapToDir(o, CoordSet.revDirection(d));
+				o.addToCoordWithDir(CoordSet.revDirection(d));
 			}
-
-			swapEnHaut(o);
-
-			while (matrice[o.getX() + 1][o.getY()] != Cells.JOUEUR){
-				swapEnBas(o);
-				o.addToX(1);
-			}
-			
-			swapEnBas(o);
-		} else if (d == Direction.HAUT && checkForMove(o, d)) {
-			swapEnHaut(o);
-		}
-		
-		
-		if (d == Direction.BAS && matrice[o.getX() + 1][o.getY()] == Cells.BOITE) {
-			o.addToX(1);
-
-			while (matrice[o.getX() + 1][o.getY()] == Cells.BOITE) {
-				o.addToX(1);
-			}
-
-			if (!checkForMove(o, d)) {
-				return;
-			}
-
-			swapEnBas(o);
-
-			while (matrice[o.getX() - 1][o.getY()] != Cells.JOUEUR){
-				swapEnHaut(o);
-				o.addToX(-1);
-			}
-			
-			swapEnHaut(o);
-		} else if (d == Direction.BAS && checkForMove(o, d)) {
-			swapEnBas(o);
-		}
-		
-
-		if (d == Direction.GAUCHE && matrice[o.getX()][o.getY() - 1] == Cells.BOITE) {
-			o.addToY(-1);
-
-			while (matrice[o.getX()][o.getY() - 1] == Cells.BOITE) {
-				o.addToY(-1);
-			}
-
-			if (!checkForMove(o, d)) {
-				return;
-			}
-
-			swapAGauche(o);
-
-			while (matrice[o.getX()][o.getY() + 1] != Cells.JOUEUR){
-				swapADroite(o);
-				o.addToY(1);
-			}
-			
-			swapADroite(o);
-		} else if (d == Direction.GAUCHE && checkForMove(o, d)) {
-			swapAGauche(o);
-		}
-
-		if (d == Direction.DROITE && matrice[o.getX()][o.getY() + 1] == Cells.BOITE) {
-			o.addToY(1);
-
-			while (matrice[o.getX()][o.getY() + 1] == Cells.BOITE) {
-				o.addToY(1);
-			}
-
-			if (!checkForMove(o, d)) {
-				return;
-			}
-
-			swapADroite(o);
-
-			while (matrice[o.getX()][o.getY() - 1] != Cells.JOUEUR){
-				swapAGauche(o);
-				o.addToY(-1);
-			}
-			
-			swapAGauche(o);
-		} else if (d == Direction.DROITE && checkForMove(o, d)) {
-			swapADroite(o);
-		}
+			swapToDir(o, CoordSet.revDirection(d));
+		} 
+		else if (checkForMove(o, d))
+			swapToDir(o, d);
 	}
-
-
+	
+	/**
+		Renvoie la matrice du niveau
+	*/
 	public int[][] getLevelData() {
 		return this.matrice;
 	}
 
+	/**
+		Renvoie le Cell situé sur les coordonnées (x, y) de la matrice 
+	*/
 	public int getLevelData(int x, int y) {
 		return this.matrice[x][y];
 	}
 
+	/**
+		Renvoie la taille de la matrice du niveau
+	*/
 	public int getSizeMat() {
     	return this.taille;
     }
 
+    /**
+		Renvoie les coordonnées du joueur dans la matrice du niveau 	
+	*/
     public CoordSet playerSpawn() {
     	int i, j;
 
-    	for (i = 0; i < getSizeMat(); i++) {
-    		for (j = 0; j < getSizeMat(); j++) {
-    			if (this.matrice[i][j] == Cells.JOUEUR) {
+    	for (i = 0; i < getSizeMat(); i++) 
+    		for (j = 0; j < getSizeMat(); j++) 
+    			if (this.matrice[i][j] == Cells.JOUEUR) 
     				return new CoordSet(i, j);
-    			}
-    		}
-    	}
     	return new CoordSet(-2, -2);
     }
 
+    /**
+		Renvoie true si toutes les cibles sont atteintes
+		Sinon renvoie false
+	*/
     public boolean winConditionMet() {
     	int i;
 
-		for (i = 0; i < getListTarget().size(); i++) {
-    		if (matrice[getListTarget().get(i).getX()][getListTarget().get(i).getY()] == Cells.VIDE) {
+		for (i = 0; i < getListTarget().size(); i++) 
+    		if (matrice[getListTarget().get(i).getX()][getListTarget().get(i).getY()] == Cells.VIDE)
     			return false;
-    		}
-    	}
     	return true;
     }
-/*
-    public void putPlayerTarget(int x, int y) {
-    	this.playerTarget = new CoordSet(x, y);  
-    }
 
-    public CoordSet getPlayerTarget() {
-    	return this.playerTarget;
-    }
-
-    public ArrayList<CoordSet> getBoxTarget() {
-    	return this.boxTarget;
-    }
-*/
+    /**
+		Renvoie la liste des coordonnées des cibles
+	*/
     public ArrayList<CoordSet> getListTarget() {
     	return this.listTarget;
     }
 
+    /**
+		Renvoie true si le Cell en coordonnées (x, y) de la matrice du niveau est un monde
+		Sinon renvoie false 
+	*/
     public boolean isAWorld(int x, int y) {
-    	if (this.matrice[x][y] >= 0) {
+    	if (this.matrice[x][y] >= 0)
     		return true;
-    	}
     	return false;
     }
 
+    /**
+		Renvoie le numéro du monde qui contient ce niveau 
+	*/
     public int getOutsideWorld() {
     	return this.outsideWorld;
     }
 
-     public void setOutsideWorld(int val) {
+    /**
+		Initialise la variable du numéro du monde qui contient ce niveau à val
+	*/
+    public void setOutsideWorld(int val) {
     	this.outsideWorld = val;
     }
 
+   	/**
+		Renvoie le numéro de ce niveau
+	*/
     public int getWorldNum() {
     	return this.worldNum;
     }
 
+    /**
+		Renvoie les coordonnées du monde avec le numéro numWorld dans ce niveau
+	*/
     public CoordSet getPosWorld(int numWorld) {
     	int i, j;
 
-    	for (i = 0; i < getSizeMat(); i++) {
-    		for (j = 0; j < getSizeMat(); j++) {
-    			if (matrice[i][j] == numWorld) {
+    	for (i = 0; i < getSizeMat(); i++) 
+    		for (j = 0; j < getSizeMat(); j++) 
+    			if (matrice[i][j] == numWorld)
     				return new CoordSet(i, j);
-    			}
-    		}
-    	}
     	return new CoordSet(-3, -3);
     }
-
-    public void swapEnHaut(CoordSet c) {
-    	int tmp = matrice[c.getX()][c.getY()];
-    	matrice[c.getX()][c.getY()] = matrice[c.getX() - 1][c.getY()];
-    	matrice[c.getX() - 1][c.getY()] = tmp;
-    }
-
-    public void swapEnBas(CoordSet c) {
-    	int tmp = matrice[c.getX()][c.getY()];
-    	matrice[c.getX()][c.getY()] = matrice[c.getX() + 1][c.getY()];
-    	matrice[c.getX() + 1][c.getY()] = tmp;
-    }
     
-    public void swapAGauche(CoordSet c) {
-    	int tmp = matrice[c.getX()][c.getY()];
-    	matrice[c.getX()][c.getY()] = matrice[c.getX()][c.getY() - 1];
-    	matrice[c.getX()][c.getY() - 1] = tmp;
-    }
-    
-    public void swapADroite(CoordSet c) {
-    	int tmp = matrice[c.getX()][c.getY()];
-    	matrice[c.getX()][c.getY()] = matrice[c.getX()][c.getY() + 1];
-    	matrice[c.getX()][c.getY() + 1] = tmp;
-    }
+	/**
+    	Effectue un mouvement vers la direction d du Cell situé sur les coordonnées c
+    */
+	public void swapToDir(CoordSet c, Direction d) {
+		int tmp = matrice[c.getX()][c.getY()];
+    	matrice[c.getX()][c.getY()] = matrice[c.getAddToXWithDir(d)][c.getAddToYWithDir(d)];
+    	matrice[c.getAddToXWithDir(d)][c.getAddToYWithDir(d)] = tmp;
+	}
 
-	public CoordSet EnterPos(Diretion d){
+	/** 
+		Renvoie les coordonnées correspondant à l'entrée de ce niveau par la direction d 
+	*/
+	public CoordSet enterPos(Direction d) {
 		if (d == Direction.HAUT) {
-			return CoordSet(getSizeMat() - 1, getSizeMat()/2);
+			return new CoordSet(getSizeMat() - 1, getSizeMat()/2);
 		}
 		if (d == Direction.BAS) {
-			return CoordSet(0, getSizeMat()/2);
+			return new CoordSet(0, getSizeMat()/2);
 		}
 		if (d == Direction.GAUCHE) {
-			return CoordSet(getSizeMat()/2, getSizeMat() - 1);
+			return new CoordSet(getSizeMat()/2, getSizeMat() - 1);
 		}
 		if (d == Direction.DROITE) {
-			return CoordSet(getSizeMat() /2, 0);
+			return new CoordSet(getSizeMat() /2, 0);
 		}
+		return new CoordSet(-7, -7);
+	}
+
+	/**
+		Renvoie true si les coordonnées o si situe sur les extrémités de la matrice de ce nivreau 
+		et que la direction d se dirige vers l'extérieur de ce niveau.
+		Sinon renvoie false
+	*/
+	public boolean onEdge(CoordSet o, Direction d) {
+		if (d == Direction.HAUT && o.getX() == 0)
+			return true;
+		else if (d == Direction.BAS && o.getX() == getSizeMat() - 1) 
+			return true;
+		else if (d == Direction.GAUCHE && o.getY() == 0) 
+			return true;
+		else if (d == Direction.DROITE && o.getY() == getSizeMat() - 1)
+			return true;
+		return false;
 	}
 }
