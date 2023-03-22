@@ -10,22 +10,18 @@ public class LevelData {
 		this.path = path;
 	}
 
-
+	/**
+		Permet de récupèrer les niveaux présent dans le nom fichier (chemin absolu) donné dans l'attribut path (grace au constructeur)
+		afin de les ajouter dans l'attribut de type liste (listData) 
+	*/
 	public void loadFromFile() {
 		try {
 			File f = new File(path);
 			FileInputStream s = new FileInputStream(f);
-			
-			//ArrayList<LevelMove> res = new ArrayList<LevelMove>();
 
-			int nbMonde = depthLevel();
+			int nbMonde = depthLevel(); // nbre de niveau
 			int numWorld = 0;
-	/*		
-			int [][] data;
-			int taille;
-			int outsideWorld = 0;
-			ArrayList<CoordSet> listTarget = new ArrayList<CoordSet>();
-*/
+
 			while (numWorld < nbMonde) {	
 				int [][] data;
 				int taille;
@@ -34,17 +30,18 @@ public class LevelData {
 
 				outsideWorld = getOutsideWorld((char) s.read(), nbMonde);
 
-				s.read();
+				s.read(); // espace
 
-				taille = Character.getNumericValue((char)s.read());
+				taille = Character.getNumericValue((char)s.read()); // taille du niveau de numéro numWorld
 				
 				int res, k = 0; 
 				int i = 0, j = 0;
 
 				data = new int[taille][taille];
 
-				s.read();
+				s.read(); // saut de ligne
 				
+				/* Lecture et initialisation de la matrice du niveau de numéro numWorld */
 				while (k < (taille * taille) + taille) {
 					res = s.read();
 					
@@ -52,7 +49,6 @@ public class LevelData {
 						i++;
 						j = 0;
 					}
-
 					
 					if (res == 64) {
 						data[i][j] = Cells.VIDE;
@@ -83,7 +79,7 @@ public class LevelData {
 					k++;
 				}
 
-				s.read();
+				s.read(); // saut de ligne
 
 				listData.add(new LevelMove(data, taille, numWorld, outsideWorld, listTarget));
 				numWorld++;
@@ -92,10 +88,11 @@ public class LevelData {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-
-		//return res;
 	}
 
+	/**
+		Renvoie le nombre de niveau dans le fichier
+	*/
 	public int depthLevel() {
 		int res = 0;
 		
@@ -105,17 +102,18 @@ public class LevelData {
 			int i, taille;
 			
 			while(s.read() != -1) {
-				s.read();
+				s.read(); // espace
 				i = 0;
 				taille = Character.getNumericValue((char)s.read());
 
-				s.read();
+				s.read(); // saut de ligne
 				
+				/* Lecture de la matrice du niveau */
 				while (i < (taille * taille) + taille) {
 					s.read();
 					i++;
 				}
-				s.read();
+				s.read(); // saut de ligne
 				res++;
 			}
 			s.close();
@@ -126,6 +124,10 @@ public class LevelData {
 		return res;
 	}
 
+	/**
+		Renvoie un tableau à deux dimensions avec tous les noms des mondes présent dans le fichier 
+		avec chacun le nom des mondes qu'ils contiennent 
+	*/
 	public char [][] getNameWorld(int nbMonde) {
 		char [][] tabName = new char[nbMonde][nbMonde];
 		
@@ -136,18 +138,19 @@ public class LevelData {
 			
 			while(k < nbMonde) {
 				j = 1;
-				tabName[k][0] = (char) s.read();
+				tabName[k][0] = (char) s.read(); // initialisation avec le nom du niveau k
 
 				if (nbMonde == 1) {
 					return tabName;
 				}
 
-				s.read();
+				s.read(); // espace
 				i = 0;
 				taille = Character.getNumericValue((char)s.read());
 
-				s.read();
+				s.read(); // saut de ligne
 				
+				/* Lecture et initialisation du tableau avec le nom des mondes présents dans le niveau k */
 				while (i < (taille * taille) + taille) {
 					tmp = s.read();
 					if (tmp >= 67 && tmp <= 90 && j < nbMonde) {
@@ -156,8 +159,9 @@ public class LevelData {
 					}
 					i++;
 				}
-				s.read();
+				s.read(); // saut de ligne
 				
+				/* On remplit le reste non utilisé par un caractère par défaut */
 				while (j < nbMonde) {
 					tabName[k][j] = '&';
 					j++;
@@ -173,6 +177,9 @@ public class LevelData {
 		return tabName;
 	}
 
+	/**
+		Renvoie le numéro du monde avec le nom nameWorld	
+	*/
 	public int getNumWorld(char nameWorld, int nbMonde) {
 		int i;
 		char [][] tabName = getNameWorld(nbMonde);
@@ -186,6 +193,9 @@ public class LevelData {
 		return -1;
 	}
 
+	/**
+		Renvoie le numéro du monde extérieur du niveau avec le nom nameWorld	
+	*/
 	public int getOutsideWorld(char nameWorld, int nbMonde) {
 		int i, j;
 		char [][] tabName = getNameWorld(nbMonde);
@@ -200,25 +210,19 @@ public class LevelData {
 		return 0;
 	} 
 
+	/**
+		Renvoie le nom du monde avec le numéro du monde numWorld	
+	*/
 	public char getName(int numWorld) {
 		char [][] tabName = getNameWorld(depthLevel());
 
 		return tabName[numWorld][0];
 	}
 
+	/**
+		Renvoie la liste avec tous les niveaux du fichier	
+	*/
 	public ArrayList<LevelMove> getListData() {
 		return this.listData;
-	}
-
-	public void printNameWorld() {
-		int i, j, n = depthLevel();
-		char [][] tabName = getNameWorld(n);
-
-		for (i = 0; i < n; i++) {
-			for (j = 0; j < n; j++) {
-				System.out.print(tabName[i][j]);
-			}
-			System.out.println("");
-		}
 	}
 }
