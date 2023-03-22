@@ -1,9 +1,8 @@
 import java.io.*;
 import java.util.*;
 
-public class ApplicationSokoban{
+public class ApplicationSokoban {
     public static void main(String [] args) throws Exception {
-        boolean erreur = true;
         if (args.length != 2) {
             System.out.println("Argument non reconnu :(");
             System.out.println("Il faut 2 argument : \n1 - le mode de jeu (classique, récursive ...)\n2 - le nom du fichier de niveau (chemin absolu menant au fichier)");
@@ -13,22 +12,19 @@ public class ApplicationSokoban{
         LevelData data = new LevelData(args[1]);
         data.loadFromFile();
 
-        do {
-            switch(args[0]){
-                case "classique":
-                    erreur = false;
-                    jeuClassique(data);
-                    break;
-                case "récursive":
-                    erreur = false;
-                    jeuRecursive(data);
-                    break;
-                default:
-                    System.out.println("argument non reconnu");
-                    break;
-            }
+    
+        switch(args[0]) {
+            case "classique":
+                jeuClassique(data);
+                break;
+            case "récursive":
+                jeuRecursive(data);
+                break;
+            default:
+                System.out.println("argument non reconnu");
+                break;
         }
-        while (erreur);
+
         System.out.println("Fin du jeu");
     }
 
@@ -83,7 +79,6 @@ public class ApplicationSokoban{
         univ.getUnivers().get(playerWorld).displayInTerminal(data);
 
         while (!univ.winConditionMetUniv()) {
-            
             BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 
             System.out.println("Utiliser touche h pour aller à gauche, k (en haut), j (en bas), l (à droite)");
