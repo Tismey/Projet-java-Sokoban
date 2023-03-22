@@ -3,7 +3,7 @@ import java.util.*;
 public class Univers {
 	private ArrayList<LevelMove> univ;
 	private int taille;
-	private int [] worldAcces;
+	private int [] worldAcces; /** Tableau qui va nous permettre de savoir si on peut entrer ou non dans un monde (>0 oui : 0 non) */
 
 	public Univers() {
 		this.univ = new ArrayList<LevelMove>();
@@ -15,885 +15,334 @@ public class Univers {
 		this.taille = taille;
 	}
 
+	/**
+		Renvoie true si le mouvement à partir de la coordonnée o (position du joueur) du niveau l (niveau où se trouve le joueur) 
+		vers la direction d est possible sur un ou éventuellement plusieurs niveaux.
+	*/
 	public boolean checkMovePossible(CoordSet o, Direction d, LevelMove l) {
 		int [][] tmpMat = l.getLevelData();
 		LevelMove tmpL;
-		CoordSet tmpCoord, tmpCoord2 = new CoordSet(o.getX(), o.getY());
+		CoordSet tmpCoord, tmpCoord2 = CoordSet.addVec(o, CoordSet.dirToVec(CoordSet.revDirection(d)));
 
-		if (o.getX() == -1) {
+		/* On réctifie les coordonnées de o (cas quand on veut sortir d'un niveau 
+			mais que le niveau courant se situe sur les extrémités du niveau extérieur) */
+		if (o.getX() == -1)
 			o.addToX(1);
-		}
-		if (o.getX() == l.getSizeMat()) {
+		if (o.getX() == l.getSizeMat())
 			o.addToX(-1);
-		}
-		if (o.getY() == -1) {
+		if (o.getY() == -1)
 			o.addToY(1);
-		}
-		if (o.getY() == l.getSizeMat()) {
+		if (o.getY() == l.getSizeMat())
 			o.addToY(-1);
-		}
 
-		if (tmpMat[o.getX()][o.getY()] == Cells.MUR) {
+		/* Cas d'arrêt */
+		if (tmpMat[o.getX()][o.getY()] == Cells.MUR)
 			return false;
-		}
-		else if (tmpMat[o.getX()][o.getY()] == Cells.VIDE) {
+		else if (tmpMat[o.getX()][o.getY()] == Cells.VIDE)
 			return true;
-		}
 
-		if (d == Direction.HAUT && o.getX() == 0) {
+		/* Si les coordonnées o se situe sur les extrémités du niveau */
+		if (l.onEdge(o, d)) {
+			/* On récupère le monde extérieur du niveau courant */
 			tmpL = univ.get(l.getOutsideWorld());
+			/* On récupère les coordonnées du monde courant dans le niveau extérieur */
 			if (isWorldInThisLevel(tmpL, l.getWorldNum()))
 				tmpCoord = tmpL.getPosWorld(l.getWorldNum());
 			else
 				tmpCoord = tmpL.getPosWorld(whereWorldIs(tmpL, l.getWorldNum()));
-			
-			tmpCoord.addToX(-1);
-			
+			/* On positionne les coordonnées tmpCoord sur la sortie du monde courant */
+			tmpCoord.addToCoordWithDir(d);
+			/* Si le mouvement n'est pas possible on s'arrête (on renvoie false) */
 			if (!checkMovePossible(tmpCoord, d, tmpL))
 				return false;
-			else
+			else /* Sinon on continue de vérifier avec ces nouvelles coordonnées */
 				return checkMovePossible(tmpCoord, d, tmpL);
 		}
-
-		if (d == Direction.HAUT && tmpMat[o.getX() - 1][o.getY()] != Cells.VIDE) {
-			while (tmpMat[o.getX() - 1][o.getY()] != Cells.VIDE) {
-				o.addToX(-1);
+		/* Si mouvement avec chaînage */
+		if (tmpMat[o.getAddToXWithDir(d)][o.getAddToYWithDir(d)] != Cells.VIDE) {
+			while (tmpMat[o.getAddToXWithDir(d)][o.getAddToYWithDir(d)] != Cells.VIDE) {
+				/* On avance les coordonnées de o tant qu'on tombe pas sur le vide */
+				o.addToCoordWithDir(d);
+				/* Si on tombe sur un mur on s'arrête et on revient d'un cran sur les coordonnées o */
 				if (tmpMat[o.getX()][o.getY()] == Cells.MUR) {
-					o.addToX(1);
+					o.addToCoordWithDir(o.revDirection(d));
 					break;
 				}
-				if (o.getX() == 0) {
+				/* Si les coordonnées o se situe sur les extrémités du niveau on fait comme précedemment */
+				if (l.onEdge(o, d)) {
 					tmpL = univ.get(l.getOutsideWorld());
 					if (isWorldInThisLevel(tmpL, l.getWorldNum()))
 						tmpCoord = tmpL.getPosWorld(l.getWorldNum());
 					else
 						tmpCoord = tmpL.getPosWorld(whereWorldIs(tmpL, l.getWorldNum()));
-					
-					tmpCoord.addToX(-1);
-
-					if (!checkMovePossible(tmpCoord, d, tmpL)) {
+					tmpCoord.addToCoordWithDir(d);
+					if (!checkMovePossible(tmpCoord, d, tmpL))
 						break;
-					}
 					else
 						return checkMovePossible(tmpCoord, d, tmpL);
 				}
-				if (tmpMat[o.getX() - 1][o.getY()] == Cells.VIDE) {
+				/* Si on tombe sur un vide on s'arrête (on renvoie true) */
+				if (tmpMat[o.getAddToXWithDir(d)][o.getAddToYWithDir(d)] == Cells.VIDE)
 					return true;
-				}
 			}
-
-			//while (tmpMat[o.getX()][o.getY()] != Cells.VIDE && tmpMat[o.getX()][o.getY()] != Cells.JOUEUR) {
+			/* On repasse sur toutes les cases traversées avec la précedente boucle while */
 			while (!o.equals(tmpCoord2)) {	
+				/* Si c'est un monde on vérifie qu'il soit possible de faire un mouvement dans ce monde */
 				if (l.isAWorld(o.getX(), o.getY())) {
 					tmpL = univ.get(tmpMat[o.getX()][o.getY()]);
-					if (checkMovePossible(new CoordSet(tmpL.getSizeMat() - 1, tmpL.getSizeMat() / 2), d, tmpL)) {
-						worldAcces[tmpMat[o.getX()][o.getY()]]++;
-						return checkMovePossible(new CoordSet(tmpL.getSizeMat() - 1, tmpL.getSizeMat() / 2), d, tmpL);
-					}
-					else {
-						o.addToX(1);
+					if (checkMovePossible(tmpL.enterPos(d), d, tmpL)) {
+						worldAcces[tmpMat[o.getX()][o.getY()]]++; // on donne l'accès à ce monde
+						return checkMovePossible(tmpL.enterPos(d), d, tmpL);
 					}
 				}
-				else {
-					o.addToX(1);
-				}
-
-				if (o.getX() == l.getSizeMat())
-					break;
-		
+				o.addToCoordWithDir(o.revDirection(d));
 			}
 			return false;
 		}
-
-		if (d == Direction.BAS && o.getX() == l.getSizeMat() - 1) {
-			tmpL = univ.get(l.getOutsideWorld());
-			if (isWorldInThisLevel(tmpL, l.getWorldNum()))
-				tmpCoord = tmpL.getPosWorld(l.getWorldNum());
-			else {
-				tmpCoord = tmpL.getPosWorld(whereWorldIs(tmpL, l.getWorldNum()));
-			}
-			tmpCoord.addToX(1);
-			if (!checkMovePossible(tmpCoord, d, tmpL))
-				return false;
-			else
-				return checkMovePossible(tmpCoord, d, tmpL);
-		}
-
-		if (d == Direction.BAS && tmpMat[o.getX() + 1][o.getY()] != Cells.VIDE) {
-			while (tmpMat[o.getX() + 1][o.getY()] != Cells.VIDE) {
-				o.addToX(1);
-				if (tmpMat[o.getX()][o.getY()] == Cells.MUR) {
-					o.addToX(-1);
-					break;
-				}
-				if (o.getX() == l.getSizeMat() - 1) {
-					tmpL = univ.get(l.getOutsideWorld());
-					if (isWorldInThisLevel(tmpL, l.getWorldNum()))
-						tmpCoord = tmpL.getPosWorld(l.getWorldNum());
-					else
-						tmpCoord = tmpL.getPosWorld(whereWorldIs(tmpL, l.getWorldNum()));
-					tmpCoord.addToX(1);
-					if (!checkMovePossible(tmpCoord, d, tmpL)) {
-						break;
-					}
-					else
-						return checkMovePossible(tmpCoord, d, tmpL);
-				}
-				if (tmpMat[o.getX() + 1][o.getY()] == Cells.VIDE) {
-					return true;
-				}
-			}
-
-			//while (tmpMat[o.getX()][o.getY()] != Cells.VIDE && tmpMat[o.getX()][o.getY()] != Cells.JOUEUR) {
-			while (!o.equals(tmpCoord2)) {
-				if (l.isAWorld(o.getX(), o.getY())) {
-					tmpL = univ.get(tmpMat[o.getX()][o.getY()]);
-					if (checkMovePossible(new CoordSet(0, tmpL.getSizeMat() / 2), d, tmpL)) {
-						worldAcces[tmpMat[o.getX()][o.getY()]]++;
-						return checkMovePossible(new CoordSet(0, tmpL.getSizeMat() / 2), d, tmpL);
-					}
-					else {
-						o.addToX(-1);
-					}
-				}
-				else {
-					o.addToX(-1);
-				}
-
-				if (o.getX() == -1)
-					break;
-			}
-			return false;
-		}
-
-		
-		if (d == Direction.GAUCHE && o.getY() == 0) {
-			tmpL = univ.get(l.getOutsideWorld());
-			if (isWorldInThisLevel(tmpL, l.getWorldNum()))
-				tmpCoord = tmpL.getPosWorld(l.getWorldNum());
-			else
-				tmpCoord = tmpL.getPosWorld(whereWorldIs(tmpL, l.getWorldNum()));
-			
-			tmpCoord.addToY(-1);
-			if (!checkMovePossible(tmpCoord, d, tmpL))
-				return false;
-			else
-				return checkMovePossible(tmpCoord, d, tmpL);
-		}
-		if (d == Direction.GAUCHE && tmpMat[o.getX()][o.getY() - 1] != Cells.VIDE) {
-			while (tmpMat[o.getX()][o.getY() - 1] != Cells.VIDE) {
-				o.addToY(-1);
-				if (tmpMat[o.getX()][o.getY()] == Cells.MUR) {
-					o.addToY(1);
-					break;
-				}
-				if (o.getY() == 0) {
-					tmpL = univ.get(l.getOutsideWorld());
-					if (isWorldInThisLevel(tmpL, l.getWorldNum()))
-						tmpCoord = tmpL.getPosWorld(l.getWorldNum());
-					else
-						tmpCoord = tmpL.getPosWorld(whereWorldIs(tmpL, l.getWorldNum()));
-					tmpCoord.addToY(-1);
-					if (!checkMovePossible(tmpCoord, d, tmpL)) {
-						break;
-					}
-					else
-						return checkMovePossible(tmpCoord, d, tmpL);
-				}
-
-				if (tmpMat[o.getX()][o.getY() - 1] == Cells.VIDE) {
-					return true;
-				}
-
-			}
-
-			//while (tmpMat[o.getX()][o.getY()] != Cells.VIDE && tmpMat[o.getX()][o.getY()] != Cells.JOUEUR) {
-			while (!o.equals(tmpCoord2)) {
-				if (l.isAWorld(o.getX(), o.getY())) {
-					tmpL = univ.get(tmpMat[o.getX()][o.getY()]);
-					if (checkMovePossible(new CoordSet(tmpL.getSizeMat() / 2, tmpL.getSizeMat() - 1), d, tmpL)) {
-						worldAcces[tmpMat[o.getX()][o.getY()]]++;
-						return checkMovePossible(new CoordSet(tmpL.getSizeMat() / 2, tmpL.getSizeMat() - 1), d, tmpL);
-					}
-					else {
-						o.addToY(1);
-					}
-				}
-				else {
-					o.addToY(1);
-				}
-
-				if (o.getY() == l.getSizeMat()) 
-					break;
-			
-			}
-			return false;
-		}
-
-		if (d == Direction.DROITE && o.getY() == l.getSizeMat() - 1) {
-			tmpL = univ.get(l.getOutsideWorld());
-			if (isWorldInThisLevel(tmpL, l.getWorldNum()))
-				tmpCoord = tmpL.getPosWorld(l.getWorldNum());
-			else
-				tmpCoord = tmpL.getPosWorld(whereWorldIs(tmpL, l.getWorldNum()));
-			tmpCoord.addToY(1);
-			if (!checkMovePossible(tmpCoord, d, tmpL))
-				return false;
-			else
-				return checkMovePossible(tmpCoord, d, tmpL);
-		}
-
-		if (d == Direction.DROITE && tmpMat[o.getX()][o.getY() + 1] != Cells.VIDE) {
-			while (tmpMat[o.getX()][o.getY() + 1] != Cells.VIDE) {
-				o.addToY(1);
-				if (tmpMat[o.getX()][o.getY()] == Cells.MUR) {
-					o.addToY(-1);
-					break;
-				}
-				if (o.getY() == l.getSizeMat() - 1) {
-					tmpL = univ.get(l.getOutsideWorld());
-					if (isWorldInThisLevel(tmpL, l.getWorldNum()))
-						tmpCoord = tmpL.getPosWorld(l.getWorldNum());
-					else
-						tmpCoord = tmpL.getPosWorld(whereWorldIs(tmpL, l.getWorldNum()));
-					tmpCoord.addToY(1);
-					if (!checkMovePossible(tmpCoord, d, tmpL)) {
-						break;
-					}
-					else
-						return checkMovePossible(tmpCoord, d, tmpL);
-				}
-				if (tmpMat[o.getX()][o.getY() + 1] == Cells.VIDE) {
-					return true;
-				}	
-			}
-
-			//while (tmpMat[o.getX()][o.getY()] != Cells.VIDE && tmpMat[o.getX()][o.getY()] != Cells.JOUEUR) {
-			while (!o.equals(tmpCoord2)) {
-				if (l.isAWorld(o.getX(), o.getY())) {
-					tmpL = univ.get(tmpMat[o.getX()][o.getY()]);
-					if (checkMovePossible(new CoordSet(tmpL.getSizeMat() / 2, 0), d, tmpL)) {
-						worldAcces[tmpMat[o.getX()][o.getY()]]++;
-						return checkMovePossible(new CoordSet(tmpL.getSizeMat() / 2, 0), d, tmpL);
-					}
-					else {
-						o.addToY(-1);
-					}
-				}
-				else {
-					o.addToY(-1);
-				}
-
-				if (o.getY() == -1)
-					break;
-				
-			}
-			return false;
-		}
-
 		return true;
 	}
 
+	/**
+		Renvoie le nombre de mouvements à partir de la coordonnée o (position du joueur) du niveau l (niveau où se trouve le joueur) 
+		vers la direction d sur un ou éventuellement plusieurs niveaux.
+	*/
 	public int getNumMove(CoordSet o, Direction d, LevelMove l, int n) {
-		int [][] m;
+		int [][] m = l.getLevelData();
 		LevelMove next;
 		CoordSet tmpCoord;
 
-		if (d == Direction.HAUT) {
-			m = l.getLevelData();
+		/* Cas d'arrêt */
+		if (m[o.getX()][o.getY()] == Cells.VIDE || m[o.getX()][o.getY()] == Cells.MUR)
+			return n;
 
-			if (m[o.getX()][o.getY()] == Cells.VIDE || m[o.getX()][o.getY()] == Cells.MUR) {
-				return n;
-			}
-/*
-			if (o.getX() == 0) {
-				next = univ.get(l.getOutsideWorld());
-				if (isWorldInThisLevel(next, l.getWorldNum()))
-					tmpCoord = next.getPosWorld(l.getWorldNum());
-				else
-					tmpCoord = next.getPosWorld(whereWorldIs(next, l.getWorldNum()));
-				tmpCoord.addToX(-1);
-				n++;
-				return getNumMove(tmpCoord, d, next, n);
-			}*/
-			if (l.isAWorld(o.getX(), o.getY()) && worldAcces[m[o.getX()][o.getY()]] >= 1) {
-				next = univ.get(m[o.getX()][o.getY()]);
-				return getNumMove(new CoordSet(next.getSizeMat() - 1, next.getSizeMat() / 2), d, next, n);
-			}
-			else if (o.getX() == 0) {
-				next = univ.get(l.getOutsideWorld());
-				if (isWorldInThisLevel(next, l.getWorldNum()))
-					tmpCoord = next.getPosWorld(l.getWorldNum());
-				else
-					tmpCoord = next.getPosWorld(whereWorldIs(next, l.getWorldNum()));
-				tmpCoord.addToX(-1);
-				n++;
-				return getNumMove(tmpCoord, d, next, n);
-			}
-			else {
-				o.addToX(-1);
-				n++;
-				return getNumMove(o, d, l, n);
-			}
+		/* Si c'est un monde et qu'on peut y entrer, on continue de compter le nombre de mouvement dans ce monde 
+			(on ne fait pas d'incrémentation du nombre de mouvement quand on rentre dans un monde !) */
+		if (l.isAWorld(o.getX(), o.getY()) && worldAcces[m[o.getX()][o.getY()]] >= 1) {
+			next = univ.get(m[o.getX()][o.getY()]);
+			return getNumMove(next.enterPos(d), d, next, n);
 		}
-
-		if (d == Direction.BAS) {
-			m = l.getLevelData();
-
-			if (m[o.getX()][o.getY()] == Cells.VIDE || m[o.getX()][o.getY()] == Cells.MUR) {
-				return n;
-			}
-
-	/*		if (o.getX() == l.getSizeMat() - 1) {
-				next = univ.get(l.getOutsideWorld());
-				if (isWorldInThisLevel(next, l.getWorldNum()))
-					tmpCoord = next.getPosWorld(l.getWorldNum());
-				else
-					tmpCoord = next.getPosWorld(whereWorldIs(next, l.getWorldNum()));
-				tmpCoord.addToX(1);
-				n++;
-				return getNumMove(tmpCoord, d, next, n);
-			}*/
-			if (l.isAWorld(o.getX(), o.getY()) && worldAcces[m[o.getX()][o.getY()]] >= 1) {
-				next = univ.get(m[o.getX()][o.getY()]);
-				return getNumMove(new CoordSet(0, next.getSizeMat() / 2), d, next, n);
-			}
-			else if (o.getX() == l.getSizeMat() - 1) {
-				next = univ.get(l.getOutsideWorld());
-				if (isWorldInThisLevel(next, l.getWorldNum()))
-					tmpCoord = next.getPosWorld(l.getWorldNum());
-				else
-					tmpCoord = next.getPosWorld(whereWorldIs(next, l.getWorldNum()));
-				tmpCoord.addToX(1);
-				n++;
-				return getNumMove(tmpCoord, d, next, n);
-			}
-			else {
-				o.addToX(1);
-				n++;
-				return getNumMove(o, d, l, n);
-			}
+		else if (l.onEdge(o, d)) { /* Si les coordonnées o se situe sur les extrémités du niveau, on continue de compter le nombre de mouvement dans le monde extérieur */
+			next = univ.get(l.getOutsideWorld());
+			if (isWorldInThisLevel(next, l.getWorldNum()))
+				tmpCoord = next.getPosWorld(l.getWorldNum());
+			else
+				tmpCoord = next.getPosWorld(whereWorldIs(next, l.getWorldNum()));
+			tmpCoord.addToCoordWithDir(d);
+			n++;
+			return getNumMove(tmpCoord, d, next, n);
 		}
-
-		if (d == Direction.GAUCHE) {
-			m = l.getLevelData();
-
-			if (m[o.getX()][o.getY()] == Cells.VIDE || m[o.getX()][o.getY()] == Cells.MUR) {
-				return n;
-			}
-
-		/*	if (o.getY() == 0) {
-				next = univ.get(l.getOutsideWorld());
-				if (isWorldInThisLevel(next, l.getWorldNum()))
-					tmpCoord = next.getPosWorld(l.getWorldNum());
-				else
-					tmpCoord = next.getPosWorld(whereWorldIs(next, l.getWorldNum()));
-				tmpCoord.addToY(-1);
-				n++;
-				return getNumMove(tmpCoord, d, next, n);
-			}*/
-			if (l.isAWorld(o.getX(), o.getY()) && worldAcces[m[o.getX()][o.getY()]] >= 1) {
-				next = univ.get(m[o.getX()][o.getY()]);
-				return getNumMove(new CoordSet(next.getSizeMat() / 2, next.getSizeMat() - 1), d, next, n);
-			}
-			else if (o.getY() == 0) {
-				next = univ.get(l.getOutsideWorld());
-				if (isWorldInThisLevel(next, l.getWorldNum()))
-					tmpCoord = next.getPosWorld(l.getWorldNum());
-				else
-					tmpCoord = next.getPosWorld(whereWorldIs(next, l.getWorldNum()));
-				tmpCoord.addToY(-1);
-				n++;
-				return getNumMove(tmpCoord, d, next, n);
-			}
-			else {
-				o.addToY(-1);
-				n++;
-				return getNumMove(o, d, l, n);
-			}
+		else { /* Sinon on continue de compter le nombre de mouvement dans ce monde */
+			o.addToCoordWithDir(d);
+			n++;
+			return getNumMove(o, d, l, n);
 		}
-
-		if (d == Direction.DROITE) {
-			m = l.getLevelData();
-
-			if (m[o.getX()][o.getY()] == Cells.VIDE || m[o.getX()][o.getY()] == Cells.MUR) {
-				return n;
-			}
-
-	/*		if (o.getY() == l.getSizeMat() - 1) {
-				next = univ.get(l.getOutsideWorld());
-				if (isWorldInThisLevel(next, l.getWorldNum()))
-					tmpCoord = next.getPosWorld(l.getWorldNum());
-				else
-					tmpCoord = next.getPosWorld(whereWorldIs(next, l.getWorldNum()));
-				tmpCoord.addToY(1);
-				n++;
-				return getNumMove(tmpCoord, d, next, n);
-			}*/
-			if (l.isAWorld(o.getX(), o.getY()) && worldAcces[m[o.getX()][o.getY()]] >= 1) {
-				next = univ.get(m[o.getX()][o.getY()]);
-				return getNumMove(new CoordSet(next.getSizeMat() / 2, 0), d, next, n);
-			}
-			else if (o.getY() == l.getSizeMat() - 1) {
-				next = univ.get(l.getOutsideWorld());
-				if (isWorldInThisLevel(next, l.getWorldNum()))
-					tmpCoord = next.getPosWorld(l.getWorldNum());
-				else
-					tmpCoord = next.getPosWorld(whereWorldIs(next, l.getWorldNum()));
-				tmpCoord.addToY(1);
-				n++;
-				return getNumMove(tmpCoord, d, next, n);
-			}
-			else {
-				o.addToY(1);
-				n++;
-				return getNumMove(o, d, l, n);
-			}
-		}
-
-		return n;
 	}
 
+	/**
+		Effectue les mouvements à partir de la coordonnée o (position du joueur) du niveau l (niveau où se trouve le joueur) 
+		vers la direction d en fonction du nombre de mouvement nMove (renvoyé par la fonction getNumMove) 
+		sur un ou éventuellement plusieurs niveaux.
+	*/
 	public void move(CoordSet o, Direction d, LevelMove l, int nMove) {
-		if (d == Direction.HAUT) {
-			int n = nMove;
-			LevelMove tmpL = l, tmpL2 = l;
-			int [][] tmpMat = l.getLevelData();
-			int tmpCell1 = tmpMat[o.getX()][o.getY()], tmpCell2;
-			tmpMat[o.getX()][o.getY()] = Cells.VIDE;
-			
-			while (n > 0) {
-				if (o.getX() == 0) {
-					tmpL = univ.get(tmpL2.getOutsideWorld());
-					if (isWorldInThisLevel(tmpL, tmpL2.getWorldNum()))
-						tmpCell2 = univ.get(tmpL2.getOutsideWorld()).getLevelData(tmpL.getPosWorld(tmpL2.getWorldNum()).getX() - 1, tmpL.getPosWorld(tmpL2.getWorldNum()).getY());
-					else
-						tmpCell2 = univ.get(tmpL2.getOutsideWorld()).getLevelData(tmpL.getPosWorld(whereWorldIs(tmpL, tmpL2.getWorldNum())).getX() - 1, tmpL.getPosWorld(whereWorldIs(tmpL, tmpL2.getWorldNum())).getY());
-				/*	if (n < nMove) {
-						tmpMat[o.getX()][o.getY()] = tmpCell1;
-					}*/
-					if (isWorldInThisLevel(tmpL, tmpL2.getWorldNum()))
-						o.chgCoord(tmpL.getPosWorld(tmpL2.getWorldNum()).getX() - 1, tmpL.getPosWorld(tmpL2.getWorldNum()).getY());
-					else
-						o.chgCoord(tmpL.getPosWorld(whereWorldIs(tmpL, tmpL2.getWorldNum())).getX() - 1, tmpL.getPosWorld(whereWorldIs(tmpL, tmpL2.getWorldNum())).getY());
-					tmpMat = tmpL.getLevelData();
-					tmpMat[o.getX()][o.getY()] = tmpCell1;
-					if (tmpL.isAWorld(o.getX(), o.getY())) {
-						univ.get(tmpMat[o.getX()][o.getY()]).setOutsideWorld(tmpL.getWorldNum());
-					}
-					tmpCell1 = tmpCell2;
-					tmpL2 = tmpL;
-					n--;
-					continue;
-				}
+		int [][] tmpMat = l.getLevelData();
+		int n = nMove, tmpCell1 = tmpMat[o.getX()][o.getY()], tmpCell2; // initialement tmpCell1 = Cells.JOUEUR
+		LevelMove tmpL = l, tmpL2 = l; // initialement tmpL et tmpL2 correspondent au niveau du joueur
+
+		tmpMat[o.getX()][o.getY()] = Cells.VIDE; // on déplace le joueur donc met aux coordonnées initiales -> Cells.VIDE
+
+		while (n > 0) {
+			/* Si on doit faire le mouvement dans le monde extérieur du niveau courant */
+			if (tmpL.onEdge(o, d)) {
+				/* On récupère le monde extérieur du niveau courant */
+				tmpL = univ.get(tmpL2.getOutsideWorld());
+				/* On conserve le Cell positionné à la sortie du niveau courant */
+				if (isWorldInThisLevel(tmpL, tmpL2.getWorldNum()))
+					tmpCell2 = univ.get(tmpL2.getOutsideWorld()).getLevelData(tmpL.getPosWorld(tmpL2.getWorldNum()).getAddToXWithDir(d), tmpL.getPosWorld(tmpL2.getWorldNum()).getAddToYWithDir(d));
 				else
-					tmpCell2 = tmpMat[o.getX() - 1][o.getY()];
-
-				if (tmpL.isAWorld(o.getX() - 1, o.getY()) && worldAcces[tmpMat[o.getX() - 1][o.getY()]] >= 1) {
-					tmpL = univ.get(tmpMat[o.getX() - 1][o.getY()]);
-					tmpCell2 = univ.get(tmpMat[o.getX() - 1][o.getY()]).getLevelData(tmpL.getSizeMat() - 1, tmpL.getSizeMat()/2);
-					tmpMat = tmpL.getLevelData();
-					o.chgCoord(tmpL.getSizeMat() - 1, tmpL.getSizeMat()/2);
-					if (tmpL.isAWorld(o.getX(), o.getY()) && worldAcces[tmpMat[o.getX()][o.getY()]] >= 1) {
-						univ.get(tmpMat[o.getX()][o.getY()]).setOutsideWorld(l.getWorldNum());
-						tmpL = univ.get(tmpMat[o.getX()][o.getY()]);
-						tmpCell2 = univ.get(tmpMat[o.getX()][o.getY()]).getLevelData(tmpL.getSizeMat() - 1, tmpL.getSizeMat()/2);
-						tmpMat = tmpL.getLevelData();
-						while (tmpL.isAWorld(o.getX(), o.getY()) && worldAcces[tmpMat[o.getX()][o.getY()]] >= 1) {
-							univ.get(tmpMat[o.getX()][o.getY()]).setOutsideWorld(l.getWorldNum());
-							tmpL = univ.get(tmpMat[o.getX()][o.getY()]);
-							tmpCell2 = univ.get(tmpMat[o.getX()][o.getY()]).getLevelData(tmpL.getSizeMat() - 1, tmpL.getSizeMat()/2);
-							tmpMat = tmpL.getLevelData();
-						}
-						tmpMat[o.getX()][o.getY()] = tmpCell1;
-						tmpCell1 = tmpCell2;
-						n--;
-						continue;
-					}
-					tmpMat[o.getX()][o.getY()] = tmpCell1;
-					if (tmpL.isAWorld(o.getX(), o.getY())) {
-						univ.get(tmpMat[o.getX()][o.getY()]).setOutsideWorld(tmpL.getWorldNum());
-					}
-					tmpCell1 = tmpCell2;
-				}
-				else if (tmpMat[o.getX() - 1][o.getY()] != Cells.MUR) {
-					tmpMat[o.getX() - 1][o.getY()] = tmpCell1;
-					tmpCell1 = tmpCell2;
-					o.addToX(-1);
-					if (o.getX() == 0) {
-						n--;
-						continue;
-					}
-					tmpCell2 = tmpMat[o.getX() - 1][o.getY()];
-				}
-				n--;
-			}
-		}
-
-		if (d == Direction.BAS) {
-			int n = nMove;
-			LevelMove tmpL = l, tmpL2 = l;
-			int [][] tmpMat = l.getLevelData();
-			int tmpCell1 = tmpMat[o.getX()][o.getY()], tmpCell2;
-			tmpMat[o.getX()][o.getY()] = Cells.VIDE;
-			
-			while (n > 0) {
-				if (o.getX() == tmpL2.getSizeMat() - 1) {
-					tmpL = univ.get(l.getOutsideWorld());
-					if (isWorldInThisLevel(tmpL, tmpL2.getWorldNum()))
-						tmpCell2 = univ.get(tmpL2.getOutsideWorld()).getLevelData(tmpL.getPosWorld(tmpL2.getWorldNum()).getX() + 1, tmpL.getPosWorld(tmpL2.getWorldNum()).getY());
-					else
-						tmpCell2 = univ.get(tmpL2.getOutsideWorld()).getLevelData(tmpL.getPosWorld(whereWorldIs(tmpL, tmpL2.getWorldNum())).getX() + 1, tmpL.getPosWorld(whereWorldIs(tmpL, tmpL2.getWorldNum())).getY());
-					/*
-					if (n < nMove) {
-						tmpMat[o.getX()][o.getY()] = tmpCell1;
-					}*/
-					if (isWorldInThisLevel(tmpL, tmpL2.getWorldNum()))
-						o.chgCoord(tmpL.getPosWorld(tmpL2.getWorldNum()).getX() + 1, tmpL.getPosWorld(tmpL2.getWorldNum()).getY());
-					else
-						o.chgCoord(tmpL.getPosWorld(whereWorldIs(tmpL, tmpL2.getWorldNum())).getX() + 1, tmpL.getPosWorld(whereWorldIs(tmpL, tmpL2.getWorldNum())).getY());
-					tmpMat = tmpL.getLevelData();
-					tmpMat[o.getX()][o.getY()] = tmpCell1;
-					if (tmpL.isAWorld(o.getX(), o.getY())) {
-						univ.get(tmpMat[o.getX()][o.getY()]).setOutsideWorld(tmpL.getWorldNum());
-					}
-					tmpCell1 = tmpCell2;
-					tmpL2 = tmpL;
-					n--;
-					continue;
-				}
+					tmpCell2 = univ.get(tmpL2.getOutsideWorld()).getLevelData(tmpL.getPosWorld(whereWorldIs(tmpL, tmpL2.getWorldNum())).getAddToXWithDir(d), tmpL.getPosWorld(whereWorldIs(tmpL, tmpL2.getWorldNum())).getAddToYWithDir(d));
+				/* On change les coordonnées de o avec celles de la sortie du monde courant */
+				if (isWorldInThisLevel(tmpL, tmpL2.getWorldNum()))
+					o.chgCoord(tmpL.getPosWorld(tmpL2.getWorldNum()).getAddToXWithDir(d), tmpL.getPosWorld(tmpL2.getWorldNum()).getAddToYWithDir(d));
 				else
-					tmpCell2 = tmpMat[o.getX() + 1][o.getY()];	
-
-				if (tmpL.isAWorld(o.getX() + 1, o.getY()) && worldAcces[tmpMat[o.getX() + 1][o.getY()]] >= 1) {
-					tmpL = univ.get(tmpMat[o.getX() + 1][o.getY()]);
-					tmpCell2 = univ.get(tmpMat[o.getX() + 1][o.getY()]).getLevelData(0, tmpL.getSizeMat()/2);
-					tmpMat = tmpL.getLevelData();
-					o.chgCoord(0, tmpL.getSizeMat()/2);
-					if (tmpL.isAWorld(o.getX(), o.getY()) && worldAcces[tmpMat[o.getX()][o.getY()]] >= 1) {
-						univ.get(tmpMat[o.getX()][o.getY()]).setOutsideWorld(l.getWorldNum());
-						tmpL = univ.get(tmpMat[o.getX()][o.getY()]);
-						tmpCell2 = univ.get(tmpMat[o.getX()][o.getY()]).getLevelData(0, tmpL.getSizeMat()/2);
-						tmpMat = tmpL.getLevelData();
-						while (tmpL.isAWorld(o.getX(), o.getY()) && worldAcces[tmpMat[o.getX()][o.getY()]] >= 1) {
-							univ.get(tmpMat[o.getX()][o.getY()]).setOutsideWorld(l.getWorldNum());
-							tmpL = univ.get(tmpMat[o.getX()][o.getY()]);
-							tmpCell2 = univ.get(tmpMat[o.getX()][o.getY()]).getLevelData(0, tmpL.getSizeMat()/2);
-							tmpMat = tmpL.getLevelData();
-						}
-						tmpMat[o.getX()][o.getY()] = tmpCell1;
-						tmpCell1 = tmpCell2;
-						n--;
-						continue;
-					}
-					tmpMat[o.getX()][o.getY()] = tmpCell1;
-					if (tmpL.isAWorld(o.getX(), o.getY())) {
-						univ.get(tmpMat[o.getX()][o.getY()]).setOutsideWorld(tmpL.getWorldNum());
-					}
-					tmpCell1 = tmpCell2;
-				}
-				else if (tmpMat[o.getX() + 1][o.getY()] != Cells.MUR) {
-					tmpMat[o.getX() + 1][o.getY()] = tmpCell1;
-					tmpCell1 = tmpCell2;
-					o.addToX(1);
-					if (o.getX() == l.getSizeMat() - 1) {
-						n--;
-						continue;
-					}
-					tmpCell2 = tmpMat[o.getX() + 1][o.getY()];
-				}
-				n--;
+					o.chgCoord(tmpL.getPosWorld(whereWorldIs(tmpL, tmpL2.getWorldNum())).getAddToXWithDir(d), tmpL.getPosWorld(whereWorldIs(tmpL, tmpL2.getWorldNum())).getAddToYWithDir(d));
+				tmpMat = tmpL.getLevelData();
+				/* On fait le mouvement */
+				tmpMat[o.getX()][o.getY()] = tmpCell1;
+				/* Si on a déplacé un monde, on change le numéro de son monde extérieur */
+				if (tmpL.isAWorld(o.getX(), o.getY()))
+					univ.get(tmpMat[o.getX()][o.getY()]).setOutsideWorld(tmpL.getWorldNum());
+				/* On récupère le Cell conservé précédemment */
+				tmpCell1 = tmpCell2;
+				/* On conserve le niveau courant */
+				tmpL2 = tmpL;
+				n--; // prochain mouvement
+				continue;
 			}
-		}
-
-		if (d == Direction.GAUCHE) {
-			int n = nMove;
-			LevelMove tmpL = l, tmpL2 = l;
-			int [][] tmpMat = l.getLevelData();
-			int tmpCell1 = tmpMat[o.getX()][o.getY()], tmpCell2;
-			tmpMat[o.getX()][o.getY()] = Cells.VIDE;
-			
-			while (n > 0) {
-				if (o.getY() == 0) {
-					tmpL = univ.get(tmpL2.getOutsideWorld());
-					if (isWorldInThisLevel(tmpL, tmpL2.getWorldNum()))
-						tmpCell2 = univ.get(tmpL2.getOutsideWorld()).getLevelData(tmpL.getPosWorld(tmpL2.getWorldNum()).getX(), tmpL.getPosWorld(tmpL2.getWorldNum()).getY() - 1);
-					else
-						tmpCell2 = univ.get(tmpL2.getOutsideWorld()).getLevelData(tmpL.getPosWorld(whereWorldIs(tmpL, tmpL2.getWorldNum())).getX(), tmpL.getPosWorld(whereWorldIs(tmpL, tmpL2.getWorldNum())).getY() - 1);
-				/*	
-					if (n < nMove) {
-						tmpMat[o.getX()][o.getY()] = tmpCell1;
-					}
-				*/	
-					if (isWorldInThisLevel(tmpL, tmpL2.getWorldNum()))
-						o.chgCoord(tmpL.getPosWorld(tmpL2.getWorldNum()).getX(), tmpL.getPosWorld(tmpL2.getWorldNum()).getY() - 1);
-					else
-						o.chgCoord(tmpL.getPosWorld(whereWorldIs(tmpL, tmpL2.getWorldNum())).getX(), tmpL.getPosWorld(whereWorldIs(tmpL, tmpL2.getWorldNum())).getY() - 1);
-
+			else // sinon on conserve le Cell situé juste après les coordonnées o
+				tmpCell2 = tmpMat[o.getAddToXWithDir(d)][o.getAddToYWithDir(d)];
+			/* Si le Cell positionné après les coordonnées o est un monde et qu'on peut y entrer */
+			if (tmpL.isAWorld(o.getAddToXWithDir(d), o.getAddToYWithDir(d)) && worldAcces[tmpMat[o.getAddToXWithDir(d)][o.getAddToYWithDir(d)]] >= 1) {
+				/* On récupère le monde où on veut entrer du niveau courant */
+				tmpL = univ.get(tmpMat[o.getAddToXWithDir(d)][o.getAddToYWithDir(d)]);
+				/* On conserve le Cell positionné à l'entrée de ce monde */
+				tmpCell2 = univ.get(tmpMat[o.getAddToXWithDir(d)][o.getAddToYWithDir(d)]).getLevelData(tmpL.enterPos(d).getX(), tmpL.enterPos(d).getY());
+				tmpMat = tmpL.getLevelData();
+				/* On change les coordonnées de o avec celles de l'entrée du monde */
+				o.chgCoord(tmpL.enterPos(d).getX(), tmpL.enterPos(d).getY());
+				/* On vérifie si le Cell positionné à l'entrée du monde est aussi un monde et qu'on peut y entrer */
+				while (tmpL.isAWorld(o.getX(), o.getY()) && worldAcces[tmpMat[o.getX()][o.getY()]] >= 1) {
+					/* On change le numéro du monde extérieur du niveau où on va (potentiellement) entrer */
+					univ.get(tmpMat[o.getX()][o.getY()]).setOutsideWorld(tmpL2.getWorldNum());
+					/* On récupère le monde où on veut entrer du niveau courant */
+					tmpL = univ.get(tmpMat[o.getX()][o.getY()]);
+					/* On conserve le Cell positionné à l'entrée de ce monde */
+					tmpCell2 = univ.get(tmpMat[o.getX()][o.getY()]).getLevelData(tmpL.enterPos(d).getX(), tmpL.enterPos(d).getY());
 					tmpMat = tmpL.getLevelData();
-					tmpMat[o.getX()][o.getY()] = tmpCell1;
-					if (tmpL.isAWorld(o.getX(), o.getY())) {
-						univ.get(tmpMat[o.getX()][o.getY()]).setOutsideWorld(tmpL.getWorldNum());
-					}
-					tmpCell1 = tmpCell2;
-					tmpL2 = tmpL;
-					n--;
-					continue;
+					/* On change les coordonnées de o avec celles de l'entrée du monde */
+					o.chgCoord(tmpL.enterPos(d).getX(), tmpL.enterPos(d).getY());
 				}
-				else
-					tmpCell2 = tmpMat[o.getX()][o.getY() - 1];	
-				
-
-				if (tmpL.isAWorld(o.getX(), o.getY() - 1) && worldAcces[tmpMat[o.getX()][o.getY() - 1]] >= 1) {
-					tmpL = univ.get(tmpMat[o.getX()][o.getY() - 1]);
-					tmpCell2 = univ.get(tmpMat[o.getX()][o.getY() - 1]).getLevelData(tmpL.getSizeMat()/2, tmpL.getSizeMat() - 1);
-					tmpMat = tmpL.getLevelData();
-					o.chgCoord(tmpL.getSizeMat()/2, tmpL.getSizeMat() - 1);
-					if (tmpL.isAWorld(o.getX(), o.getY()) && worldAcces[tmpMat[o.getX()][o.getY()]] >= 1) {
-						univ.get(tmpMat[o.getX()][o.getY()]).setOutsideWorld(l.getWorldNum());
-						tmpL = univ.get(tmpMat[o.getX()][o.getY()]);
-						tmpCell2 = univ.get(tmpMat[o.getX()][o.getY()]).getLevelData(tmpL.getSizeMat()/2, tmpL.getSizeMat() - 1);
-						tmpMat = tmpL.getLevelData();
-						while (tmpL.isAWorld(o.getX(), o.getY()) && worldAcces[tmpMat[o.getX()][o.getY()]] >= 1) {
-							univ.get(tmpMat[o.getX()][o.getY()]).setOutsideWorld(l.getWorldNum());
-							tmpL = univ.get(tmpMat[o.getX()][o.getY()]);
-							tmpCell2 = univ.get(tmpMat[o.getX()][o.getY()]).getLevelData(tmpL.getSizeMat()/2, tmpL.getSizeMat() - 1);
-							tmpMat = tmpL.getLevelData();
-						}
-						tmpMat[o.getX()][o.getY()] = tmpCell1;
-						tmpCell1 = tmpCell2;
-						n--;
-						continue;
-					}
-					tmpMat[o.getX()][o.getY()] = tmpCell1;
-					if (tmpL.isAWorld(o.getX(), o.getY())) {
-						univ.get(tmpMat[o.getX()][o.getY()]).setOutsideWorld(tmpL.getWorldNum());
-					}
-					tmpCell1 = tmpCell2;
-				}
-				else if (tmpMat[o.getX()][o.getY() - 1] != Cells.MUR) {
-					tmpMat[o.getX()][o.getY() - 1] = tmpCell1;
-					tmpCell1 = tmpCell2;
-					o.addToY(-1);
-					if (o.getY() == 0) {
-						n--;
-						continue;
-					}
-					tmpCell2 = tmpMat[o.getX()][o.getY() - 1];
-				}
-				n--;
+				/* On fait le mouvement */
+				tmpMat[o.getX()][o.getY()] = tmpCell1;
+				/* Si on a déplacé un monde, on change le numéro de son monde extérieur */
+				if (tmpL.isAWorld(o.getX(), o.getY()))
+					univ.get(tmpMat[o.getX()][o.getY()]).setOutsideWorld(tmpL.getWorldNum());
+				/* On récupère le Cell conservé précédemment */
+				tmpCell1 = tmpCell2;
+				/* On conserve le niveau courant */
+				tmpL2 = tmpL;
 			}
-		}
-
-		if (d == Direction.DROITE) {
-			int n = nMove;
-			LevelMove tmpL = l, tmpL2 = l;
-			int [][] tmpMat = l.getLevelData();
-			int tmpCell1 = tmpMat[o.getX()][o.getY()], tmpCell2;
-			tmpMat[o.getX()][o.getY()] = Cells.VIDE;
-			
-			while (n > 0) {
-				if (o.getY() == tmpL2.getSizeMat() - 1) {
-					tmpL = univ.get(tmpL2.getOutsideWorld());
-					if (isWorldInThisLevel(tmpL, tmpL2.getWorldNum()))
-						tmpCell2 = univ.get(tmpL2.getOutsideWorld()).getLevelData(tmpL.getPosWorld(tmpL2.getWorldNum()).getX(), tmpL.getPosWorld(tmpL2.getWorldNum()).getY() + 1);
-					else
-						tmpCell2 = univ.get(tmpL2.getOutsideWorld()).getLevelData(tmpL.getPosWorld(whereWorldIs(tmpL, tmpL2.getWorldNum())).getX(), tmpL.getPosWorld(whereWorldIs(tmpL, tmpL2.getWorldNum())).getY() + 1);
-					/*
-					if (n < nMove) {
-						tmpMat[o.getX()][o.getY()] = tmpCell1;
-					}*/
-					if (isWorldInThisLevel(tmpL, tmpL2.getWorldNum()))
-						o.chgCoord(tmpL.getPosWorld(tmpL2.getWorldNum()).getX(), tmpL.getPosWorld(tmpL2.getWorldNum()).getY() + 1);
-					else
-						o.chgCoord(tmpL.getPosWorld(whereWorldIs(tmpL, tmpL2.getWorldNum())).getX(), tmpL.getPosWorld(whereWorldIs(tmpL, tmpL2.getWorldNum())).getY() + 1);
-					tmpMat = tmpL.getLevelData();
-					tmpMat[o.getX()][o.getY()] = tmpCell1;
-					if (tmpL.isAWorld(o.getX(), o.getY())) {
-						univ.get(tmpMat[o.getX()][o.getY()]).setOutsideWorld(tmpL.getWorldNum());
-					}
-					tmpCell1 = tmpCell2;
-					tmpL2 = tmpL;
-					n--;
-					continue;
-				}
-				else
-					tmpCell2 = tmpMat[o.getX()][o.getY() + 1];	
-
-				if (tmpL.isAWorld(o.getX(), o.getY() + 1) && worldAcces[tmpMat[o.getX()][o.getY() + 1]] >= 1) {
-					tmpL = univ.get(tmpMat[o.getX()][o.getY() + 1]);
-					tmpCell2 = univ.get(tmpMat[o.getX()][o.getY() + 1]).getLevelData(tmpL.getSizeMat()/2, 0);
-					tmpMat = tmpL.getLevelData();
-					o.chgCoord(tmpL.getSizeMat()/2, 0);
-					if (tmpL.isAWorld(o.getX(), o.getY()) && worldAcces[tmpMat[o.getX()][o.getY()]] >= 1) {
-						univ.get(tmpMat[o.getX()][o.getY()]).setOutsideWorld(l.getWorldNum());
-						tmpL = univ.get(tmpMat[o.getX()][o.getY()]);
-						tmpCell2 = univ.get(tmpMat[o.getX()][o.getY()]).getLevelData(tmpL.getSizeMat()/2, 0);
-						tmpMat = tmpL.getLevelData();
-						while (tmpL.isAWorld(o.getX(), o.getY()) && worldAcces[tmpMat[o.getX()][o.getY()]] >= 1) {
-							univ.get(tmpMat[o.getX()][o.getY()]).setOutsideWorld(l.getWorldNum());
-							tmpL = univ.get(tmpMat[o.getX()][o.getY()]);
-							tmpCell2 = univ.get(tmpMat[o.getX()][o.getY()]).getLevelData(tmpL.getSizeMat()/2, 0);
-							tmpMat = tmpL.getLevelData();
-						}
-						tmpMat[o.getX()][o.getY()] = tmpCell1;
-						tmpCell1 = tmpCell2;
-						n--;
-						continue;
-					}
-					tmpMat[o.getX()][o.getY()] = tmpCell1;
-					if (tmpL.isAWorld(o.getX(), o.getY())) {
-						univ.get(tmpMat[o.getX()][o.getY()]).setOutsideWorld(tmpL.getWorldNum());
-					}
-					tmpCell1 = tmpCell2;
-				}
-				else if (tmpMat[o.getX()][o.getY() + 1] != Cells.MUR) {
-					tmpMat[o.getX()][o.getY() + 1] = tmpCell1;
-					tmpCell1 = tmpCell2;
-					o.addToY(1);
-					if (o.getY() == l.getSizeMat() - 1) {
-						n--;
-						continue;
-					}
-					tmpCell2 = tmpMat[o.getX()][o.getY() + 1];
-				}
-				n--;
+			else { /* Sinon mouvement simple */
+				/* On fait le mouvement */
+				tmpMat[o.getAddToXWithDir(d)][o.getAddToYWithDir(d)] = tmpCell1;
+				/* On récupère le Cell conservé précédemment */
+				tmpCell1 = tmpCell2;
+				/* On avance les coordonnées o */
+				o.addToCoordWithDir(d);
 			}
+			n--; // prochain mouvement
 		}
 	}
 
-	public boolean addLevel(LevelMove level) {
-		this.taille++;
-		return this.univ.add(level);
-	}
-
+	/**
+		Renvoie true si toutes les cibles sont atteintes
+		Sinon renvoie false
+	*/
 	public boolean winConditionMetUniv() {
 		int i, k;
-	//	boolean player = false;
-	//	boolean box = true;
-/*
+		int [][] tmpMat;
+		LevelMove tmp;
+
 		for (i = 0; i < getTaille(); i++) {
-			if (univ.get(i).playerSpawn().equals(univ.get(i).getPlayerTarget())) {
-				player = true;
-			}
-		}
-*/
-		for (i = 0; i < getTaille(); i++) {
-			LevelMove tmp = univ.get(i);
-			int [][] tmpMat = tmp.getLevelData();
-			for (k = 0; k < tmp.getListTarget().size(); k++) { 
-				//if (tmpMat[tmp.getListTarget().get(k).getX()][tmp.getListTarget().get(k).getY()] != Cells.BOITE && !tmp.isAWorld(tmp.getListTarget().get(k).getX(), tmp.getListTarget().get(k).getY()))
+			tmp = univ.get(i);
+			tmpMat = tmp.getLevelData();
+			for (k = 0; k < tmp.getListTarget().size(); k++)
     			if (tmpMat[tmp.getListTarget().get(k).getX()][tmp.getListTarget().get(k).getY()] == Cells.VIDE)
     				return false;
-    		}
     	}
-/*
-    	if (player && box)
-    		return true;
-    	else 
-    		return false;
-   */
     	return true;
 	}
 
+	/**
+		Renvoie le numéro du monde où le joueur est situé
+	*/
 	public int getPlayerSpawnWorld() {
 		int k, i, j;
 		int [][] tmp;
 
 		for (k = 0; k < getTaille(); k++) {
 			tmp = univ.get(k).getLevelData();
-			for (i = 0; i < univ.get(k).getSizeMat(); i++) {
-				for (j = 0; j < univ.get(k).getSizeMat(); j++) {
-					if (tmp[i][j] == Cells.JOUEUR) {
+			for (i = 0; i < univ.get(k).getSizeMat(); i++)
+				for (j = 0; j < univ.get(k).getSizeMat(); j++)
+					if (tmp[i][j] == Cells.JOUEUR)
 						return k;
-					}
-				}
-			}
 		}
 		return -1;
 	}
 
+	/**
+		Initialise à 0 le tableau déclaré au début de la classe
+	*/
 	public void initWorldAcces() {
 		int i;
 		
-		worldAcces = new int[this.getTaille()];
-		for (i = 0; i < this.getTaille(); i++) {
-			worldAcces[i] = 0;
-		}
+		this.worldAcces = new int[this.getTaille()];
+		for (i = 0; i < this.getTaille(); i++)
+			this.worldAcces[i] = 0;
 	}
 
+	/**
+		Remet à 0 le tableau déclaré au début de la classe
+	*/
 	public void resetWorldAcces() {
 		int i;
 		
-		for (i = 0; i < this.getTaille(); i++) {
-			worldAcces[i] = 0;
-		}
+		for (i = 0; i < this.getTaille(); i++)
+			this.worldAcces[i] = 0;
 	}
 
-	public void printWorldAcces() {
-		int i;
-		
-		for (i = 0; i < this.getTaille(); i++) {
-			System.out.println(i+": "+worldAcces[i]);
-		}
-	}
-
+    /**
+		Renvoie le numéro du monde qui contient le numéro du monde numWorld se trouvant dans le niveau l
+	*/
     public int whereWorldIs(LevelMove l, int numWorld) {
     	int i, j;
     	int [][] tmpMat = l.getLevelData();
     	
-    	for (i = 0; i < l.getSizeMat(); i++) {
-    		for (j = 0; j < l.getSizeMat(); j++) {
+    	for (i = 0; i < l.getSizeMat(); i++)
+    		for (j = 0; j < l.getSizeMat(); j++)
     			if (l.isAWorld(i, j)) {
-    				if (tmpMat[i][j] == numWorld) {
+    				if (tmpMat[i][j] == numWorld)
     					return l.getWorldNum();
-    				}
-    				else if (isWorldIn(univ.get(tmpMat[i][j]), numWorld)) {
+    				else if (isWorldIn(univ.get(tmpMat[i][j]), numWorld))
     					return tmpMat[i][j];
-    				}
     			}
-    		}
-    	}
     	return -5;
     }
 
+    /**
+		Renvoie true si le numéro du monde numWorld se trouve dans le niveau l ou même récursivement dans un autre monde qui le contient ...
+		Sinon renvoie false
+	*/
     public boolean isWorldIn(LevelMove l, int numWorld) {
     	int i, j;
     	int [][] tmpMat = l.getLevelData();
     	
-    	for (i = 0; i < l.getSizeMat(); i++) {
-    		for (j = 0; j < l.getSizeMat(); j++) {
+    	for (i = 0; i < l.getSizeMat(); i++)
+    		for (j = 0; j < l.getSizeMat(); j++)
     			if (l.isAWorld(i, j)) {
-    				if (tmpMat[i][j] == numWorld) {
+    				if (tmpMat[i][j] == numWorld)
     					return true;
-    				}
-    				else if (isWorldIn(univ.get(tmpMat[i][j]), numWorld)) {
+    				else if (isWorldIn(univ.get(tmpMat[i][j]), numWorld))
     					return isWorldIn(univ.get(tmpMat[i][j]), numWorld);
-    				}
     			}
-    		}
-    	}
     	return false;
     }
 
+    /**
+		Renvoie true si le numéro du monde numWorld se trouve dans le niveau l
+		Sinon renvoie false
+	*/
     public boolean isWorldInThisLevel(LevelMove l, int numWorld) {
     	int i, j;
     	int [][] tmpMat = l.getLevelData();
     	
-    	for (i = 0; i < l.getSizeMat(); i++) {
+    	for (i = 0; i < l.getSizeMat(); i++)
     		for (j = 0; j < l.getSizeMat(); j++) {
-    			if (tmpMat[i][j] == numWorld) {
+    			if (tmpMat[i][j] == numWorld)
     				return true;
-    			}
     		}
-    	}
     	return false;
     }
 
+	/**
+		Renvoie une liste des mondes (ou niveaux) présent dans l'univers
+	*/
 	public ArrayList<LevelMove> getUnivers() {
 		return this.univ;
 	}
 
+	/**
+		Renvoie le nombre de monde (ou niveau) présent dans l'univers
+	*/
 	public int getTaille() {
 		return this.taille;
 	}
