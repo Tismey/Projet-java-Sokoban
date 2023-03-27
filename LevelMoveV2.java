@@ -9,14 +9,14 @@ public class LevelMoveV2 {
 	private int outsideWorld;
 	private int worldNum;
 
-	public LevelMove(int tailleMatrice) {
+	public LevelMoveV2(int tailleMatrice) {
 		this.matrice = new int[tailleMatrice][tailleMatrice];
 		this.taille = tailleMatrice;
 		this.outsideWorld = 0;
 		this.worldNum = 0;
 	}
 
-	public LevelMove(int [][] data, int tailleMatrice, int numMonde, int outsideWorld, ArrayList<CoordSet> listTarget) {
+	public LevelMoveV2(int [][] data, int tailleMatrice, int numMonde, int outsideWorld, ArrayList<CoordSet> listTarget) {
 		this.matrice = new int[tailleMatrice][tailleMatrice];
 		this.taille = tailleMatrice;
 		this.listTarget = new ArrayList<CoordSet>(listTarget);
@@ -143,7 +143,7 @@ public class LevelMoveV2 {
 			return false;
 		}
 
-		CoordSet nextSpot = CoordSet.AddVec(o, CoordSet.DirToVec(d));
+		CoordSet nextSpot = CoordSet.addVec(o, CoordSet.dirToVec(d));
 
 		if (matrice[nextSpot.getX()][nextSpot.getY()] == Cells.MUR) {
 			return false;
@@ -235,7 +235,7 @@ public class LevelMoveV2 {
     	return new CoordSet(-3, -3);
     }
 	public void swapCoords(CoordSet c, Direction d){
-		CoordSet nextSpot = CoordSet.AddVec(c, CoordSet.DirToVec(d));
+		CoordSet nextSpot = CoordSet.addVec(c, CoordSet.dirToVec(d));
 		int tmp = matrice[c.getX()][c.getY()];
     	matrice[c.getX()][c.getY()] = matrice[nextSpot.getX()][nextSpot.getY()];
     	matrice[nextSpot.getX()][nextSpot.getY()] = tmp;
