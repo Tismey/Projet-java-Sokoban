@@ -20,13 +20,8 @@ public class Display extends JPanel {
 
     public Display() throws IOException {
         l = new LevelMove(6);
+        d = new LevelData("nivClassique");
         images = new ArrayList<>();
-        images.add(ImageIO.read(new File("box.png")).getScaledInstance(200, 200, Image.SCALE_DEFAULT));
-        images.add(ImageIO.read(new File("wall.jpg")).getScaledInstance(200, 200, Image.SCALE_DEFAULT));
-        images.add(ImageIO.read(new File("player.jpg")).getScaledInstance(200, 200, Image.SCALE_DEFAULT));
-        this.setLayout(new GridLayout(l.getSizeMat(), l.getSizeMat()));
-        frame = new Frame();
-        frame.add(this);
     }
 
     public Display(LevelMove level, LevelData data) throws IOException {
@@ -36,7 +31,7 @@ public class Display extends JPanel {
         images.add(ImageIO.read(new File("box.png")));
         images.add(ImageIO.read(new File("wall.jpg")));
         images.add(ImageIO.read(new File("player.jpg")));
-        images.add(ImageIO.read(new File("aim.jpg")));
+        images.add(ImageIO.read(new File("target.png")));
     }
 
     protected void paintComponent(Graphics g) {
