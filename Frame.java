@@ -30,6 +30,9 @@ public class Frame extends JFrame implements KeyListener{
         add(panel);
         this.addKeyListener(new KeyAdapter() {
             public void keyTyped(KeyEvent e){
+
+                if (e.getKeyCode() == KeyEvent.VK_DOWN)
+                    System.out.println("sex");
                 switch(e.getKeyCode()){
                     case KeyEvent.VK_LEFT: 
                         if (l.checkForMove(l.playerSpawn(), Direction.GAUCHE))
