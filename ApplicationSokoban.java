@@ -1,19 +1,20 @@
+import java.awt.event.KeyEvent;
 import java.io.*;
 import java.util.*;
 
 public class ApplicationSokoban {
-    public static void main(String [] args) throws Exception {
+    public static void main(String[] args) throws Exception {
         if (args.length != 2) {
             System.out.println("Argument non reconnu :(");
-            System.out.println("Il faut 2 argument : \n1 - le mode de jeu (classique, récursive ...)\n2 - le nom du fichier de niveau (chemin absolu menant au fichier)");
+            System.out.println(
+                    "Il faut 2 argument : \n1 - le mode de jeu (classique, récursive ...)\n2 - le nom du fichier de niveau (chemin absolu menant au fichier)");
             return;
         }
 
         LevelData data = new LevelData(args[1]);
         data.loadFromFile();
 
-    
-        switch(args[0]) {
+        switch (args[0]) {
             case "classique":
                 jeuClassique(data);
                 break;
@@ -31,38 +32,41 @@ public class ApplicationSokoban {
     public static void jeuClassique(LevelData data) throws Exception {
         LevelMove l = data.getListData().get(0);
         l.displayInTerminal(data);
-
+        // Display display = new Display(l, data);
+        Frame frame = new Frame(l, data);
         while (!l.winConditionMet()) {
             BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 
-            System.out.println("Utiliser touche h pour aller à gauche, k (en haut), j (en bas), l (à droite)");
+            System.out.println("Utiliser touche q pour aller à gauche, z (en haut), s (en bas), d (à droite)");
 
             System.out.print("--> ");
 
             String cl = br.readLine();
-            System.out.println("");         
+            System.out.println("");
 
             switch (cl) {
-                case "h" : 
+                case "q":
                     if (l.checkForMove(l.playerSpawn(), Direction.GAUCHE))
                         l.move(l.playerSpawn(), Direction.GAUCHE);
                     break;
-                case "k" : 
-                    if (l.checkForMove(l.playerSpawn(), Direction.HAUT)) 
+                case "z":
+                    if (l.checkForMove(l.playerSpawn(), Direction.HAUT))
                         l.move(l.playerSpawn(), Direction.HAUT);
                     break;
-                case "l" : 
+                case "d":
                     if (l.checkForMove(l.playerSpawn(), Direction.DROITE))
                         l.move(l.playerSpawn(), Direction.DROITE);
                     break;
-                case "j" : 
-                    if (l.checkForMove(l.playerSpawn(), Direction.BAS)) 
-                        l.move(l.playerSpawn(), Direction.BAS);                 
+                case "s":
+                    if (l.checkForMove(l.playerSpawn(), Direction.BAS))
+                        l.move(l.playerSpawn(), Direction.BAS);
                     break;
-                default : System.out.println("Mauvaise touche !");  
+                default:
+                    System.out.println("Mauvaise touche !");
             }
-        
+
             l.displayInTerminal(data);
+            frame.getDisplay().maj();
         }
         System.out.println("Niveau réussi !");
     }
@@ -71,7 +75,7 @@ public class ApplicationSokoban {
         Univers univ = new Univers(data.getListData(), data.depthLevel());
         int playerWorld;
         int numMove, initMove = 0;
-        
+
         univ.initWorldAcces();
 
         playerWorld = univ.getPlayerSpawnWorld();
@@ -86,34 +90,47 @@ public class ApplicationSokoban {
             System.out.print("--> ");
 
             String cl = br.readLine();
-            System.out.println("");         
+            System.out.println("");
 
             switch (cl) {
-                case "h" : 
-                    if (univ.checkMovePossible(univ.getUnivers().get(playerWorld).playerSpawn(), Direction.GAUCHE, univ.getUnivers().get(playerWorld))) {
-                        numMove = univ.getNumMove(univ.getUnivers().get(playerWorld).playerSpawn(), Direction.GAUCHE, univ.getUnivers().get(playerWorld), initMove);
-                        univ.move(univ.getUnivers().get(playerWorld).playerSpawn(), Direction.GAUCHE, univ.getUnivers().get(playerWorld),numMove);
+                case "h":
+                    if (univ.checkMovePossible(univ.getUnivers().get(playerWorld).playerSpawn(), Direction.GAUCHE,
+                            univ.getUnivers().get(playerWorld))) {
+                        numMove = univ.getNumMove(univ.getUnivers().get(playerWorld).playerSpawn(), Direction.GAUCHE,
+                                univ.getUnivers().get(playerWorld), initMove);
+                        univ.move(univ.getUnivers().get(playerWorld).playerSpawn(), Direction.GAUCHE,
+                                univ.getUnivers().get(playerWorld), numMove);
                     }
                     break;
-                case "k" : 
-                    if (univ.checkMovePossible(univ.getUnivers().get(playerWorld).playerSpawn(), Direction.HAUT, univ.getUnivers().get(playerWorld))) { 
-                        numMove = univ.getNumMove(univ.getUnivers().get(playerWorld).playerSpawn(), Direction.HAUT, univ.getUnivers().get(playerWorld), initMove);
-                        univ.move(univ.getUnivers().get(playerWorld).playerSpawn(), Direction.HAUT, univ.getUnivers().get(playerWorld),numMove);
+                case "k":
+                    if (univ.checkMovePossible(univ.getUnivers().get(playerWorld).playerSpawn(), Direction.HAUT,
+                            univ.getUnivers().get(playerWorld))) {
+                        numMove = univ.getNumMove(univ.getUnivers().get(playerWorld).playerSpawn(), Direction.HAUT,
+                                univ.getUnivers().get(playerWorld), initMove);
+                        univ.move(univ.getUnivers().get(playerWorld).playerSpawn(), Direction.HAUT,
+                                univ.getUnivers().get(playerWorld), numMove);
                     }
                     break;
-                case "l" : 
-                    if (univ.checkMovePossible(univ.getUnivers().get(playerWorld).playerSpawn(), Direction.DROITE, univ.getUnivers().get(playerWorld))) {
-                        numMove = univ.getNumMove(univ.getUnivers().get(playerWorld).playerSpawn(), Direction.DROITE, univ.getUnivers().get(playerWorld), initMove);
-                        univ.move(univ.getUnivers().get(playerWorld).playerSpawn(), Direction.DROITE, univ.getUnivers().get(playerWorld), numMove);
+                case "l":
+                    if (univ.checkMovePossible(univ.getUnivers().get(playerWorld).playerSpawn(), Direction.DROITE,
+                            univ.getUnivers().get(playerWorld))) {
+                        numMove = univ.getNumMove(univ.getUnivers().get(playerWorld).playerSpawn(), Direction.DROITE,
+                                univ.getUnivers().get(playerWorld), initMove);
+                        univ.move(univ.getUnivers().get(playerWorld).playerSpawn(), Direction.DROITE,
+                                univ.getUnivers().get(playerWorld), numMove);
                     }
                     break;
-                case "j" : 
-                    if (univ.checkMovePossible(univ.getUnivers().get(playerWorld).playerSpawn(), Direction.BAS, univ.getUnivers().get(playerWorld))) {
-                        numMove = univ.getNumMove(univ.getUnivers().get(playerWorld).playerSpawn(), Direction.BAS, univ.getUnivers().get(playerWorld), initMove);
-                        univ.move(univ.getUnivers().get(playerWorld).playerSpawn(), Direction.BAS, univ.getUnivers().get(playerWorld),numMove);                 
+                case "j":
+                    if (univ.checkMovePossible(univ.getUnivers().get(playerWorld).playerSpawn(), Direction.BAS,
+                            univ.getUnivers().get(playerWorld))) {
+                        numMove = univ.getNumMove(univ.getUnivers().get(playerWorld).playerSpawn(), Direction.BAS,
+                                univ.getUnivers().get(playerWorld), initMove);
+                        univ.move(univ.getUnivers().get(playerWorld).playerSpawn(), Direction.BAS,
+                                univ.getUnivers().get(playerWorld), numMove);
                     }
                     break;
-                default : System.out.println("Mauvaise touche !");  
+                default:
+                    System.out.println("Mauvaise touche !");
             }
 
             playerWorld = univ.getPlayerSpawnWorld();
@@ -122,5 +139,4 @@ public class ApplicationSokoban {
         }
         System.out.println("Niveau réussi !");
     }
-    
 }
