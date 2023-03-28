@@ -8,7 +8,7 @@ import java.awt.event.KeyListener;
 
 
 public class Frame extends JFrame implements KeyListener{
-    private Display panel;
+    private Display display;
     private LevelMove l;
     private LevelData d;
 
@@ -16,7 +16,7 @@ public class Frame extends JFrame implements KeyListener{
         super();
         l = new LevelMove(1);
         d = new LevelData(getName());
-        add(panel);
+        add(display);
         addKeyListener(this);
         setSize(1920, 1080);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -24,36 +24,33 @@ public class Frame extends JFrame implements KeyListener{
     }
     public Frame(LevelMove level, LevelData data) throws IOException{
         super();
-        panel = new Display(level, data);
+        display = new Display(level, data);
         l = level;
         d = data;
-        add(panel);
+        add(display);
         this.addKeyListener(new KeyAdapter() {
             public void keyTyped(KeyEvent e){
-
-                if (e.getKeyCode() == KeyEvent.VK_DOWN)
-                    System.out.println("sex");
                 switch(e.getKeyCode()){
                     case KeyEvent.VK_LEFT: 
                         if (l.checkForMove(l.playerSpawn(), Direction.GAUCHE))
                             l.move(l.playerSpawn(), Direction.GAUCHE);
-                        System.out.println("sex");
-                        panel.maj();
+                        System.out.println("test");
+                        display.maj();
                         break;
                     case KeyEvent.VK_RIGHT: 
                         if (l.checkForMove(l.playerSpawn(), Direction.DROITE))
                             l.move(l.playerSpawn(), Direction.DROITE);
-                        panel.maj();
+                        display.maj();
                         break;
                     case KeyEvent.VK_UP: 
                         if (l.checkForMove(l.playerSpawn(), Direction.HAUT))
                             l.move(l.playerSpawn(), Direction.HAUT);
-                        panel.maj();
+                        display.maj();
                         break;
                     case KeyEvent.VK_DOWN: 
                         if (l.checkForMove(l.playerSpawn(), Direction.BAS))
                             l.move(l.playerSpawn(), Direction.BAS);
-                        panel.maj();
+                        display.maj();
                         break;
                 }
             };
@@ -68,7 +65,7 @@ public class Frame extends JFrame implements KeyListener{
                     System.out.println("Key released");
             };
         });
-        setSize(panel.getImages().get(0).getWidth(null)*l.getSizeMat(), panel.getImages().get(0).getWidth(null)*l.getSizeMat());
+        setSize(1000, 1000);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setVisible(true);
     }
@@ -78,7 +75,7 @@ public class Frame extends JFrame implements KeyListener{
         if(e.getKeyCode() == KeyEvent.VK_UP){
             if (l.checkForMove(l.playerSpawn(), Direction.HAUT))
                 l.move(l.playerSpawn(), Direction.HAUT);
-            panel.maj();
+            display.maj();
         } 
         return true;                    
     }
@@ -89,7 +86,7 @@ public class Frame extends JFrame implements KeyListener{
         if(e.getKeyCode() == KeyEvent.VK_UP){
             if (l.checkForMove(l.playerSpawn(), Direction.BAS))
                 l.move(l.playerSpawn(), Direction.BAS);
-            panel.maj();
+            display.maj();
         }                     
     }
 
@@ -99,7 +96,7 @@ public class Frame extends JFrame implements KeyListener{
         if(e.getKeyCode() == KeyEvent.VK_UP){
             if (l.checkForMove(l.playerSpawn(), Direction.DROITE))
                 l.move(l.playerSpawn(), Direction.DROITE);
-            panel.maj();
+            display.maj();
         }                     
     }
 
@@ -109,7 +106,7 @@ public class Frame extends JFrame implements KeyListener{
         if(e.getKeyCode() == KeyEvent.VK_UP){
             if (l.checkForMove(l.playerSpawn(), Direction.GAUCHE))
                 l.move(l.playerSpawn(), Direction.GAUCHE);
-            panel.maj();
+            display.maj();
         } 
         return true;                    
     }
@@ -120,22 +117,22 @@ public class Frame extends JFrame implements KeyListener{
             case KeyEvent.VK_LEFT: 
                 if (l.checkForMove(l.playerSpawn(), Direction.GAUCHE))
                     l.move(l.playerSpawn(), Direction.GAUCHE);
-                panel.maj();
+                display.maj();
                 break;
             case KeyEvent.VK_RIGHT: 
                 if (l.checkForMove(l.playerSpawn(), Direction.DROITE))
                     l.move(l.playerSpawn(), Direction.DROITE);
-                panel.maj();
+                display.maj();
                 break;
             case KeyEvent.VK_UP: 
                 if (l.checkForMove(l.playerSpawn(), Direction.HAUT))
                     l.move(l.playerSpawn(), Direction.HAUT);
-                panel.maj();
+                display.maj();
                 break;
             case KeyEvent.VK_DOWN: 
                 if (l.checkForMove(l.playerSpawn(), Direction.BAS))
                     l.move(l.playerSpawn(), Direction.BAS);
-                panel.maj();
+                display.maj();
                 break;
         }
     }
@@ -151,6 +148,6 @@ public class Frame extends JFrame implements KeyListener{
     }
 
     public Display getDisplay(){
-        return this.panel;
+        return this.display;
     }
 }
