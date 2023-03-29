@@ -1,5 +1,9 @@
 import java.util.*;
 
+/**
+	Classe permettant de definir un ensemble de plusieurs niveaux avec ses caractéristique,
+	les mouvements dans cette classe ne sont utilisés que pour un jeu récursive
+*/
 public class Univers {
 	private ArrayList<LevelMove> univ;
 	private int taille;

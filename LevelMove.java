@@ -2,6 +2,10 @@ import java.io.*;
 import java.util.*;
 import java.lang.*;
 
+/**
+	Classe permettant de définir un niveau avec ses caractéristique,
+	les mouvements dans cette classe ne sont utilisés que pour un jeu classique
+*/
 public class LevelMove {
 	private int[][] matrice;
 	private int taille;

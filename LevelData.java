@@ -1,6 +1,9 @@
 import java.io.*;
 import java.util.*;
 
+/**
+	Classe permettant de récupérer les données présentent dans les fichiers de niveaux
+*/
 public class LevelData {
 	private ArrayList<LevelMove> listData; // liste des niveaux
 	private String path; // nom du fichier
