@@ -12,13 +12,12 @@ CLASSES = \
         ApplicationSokoban.java \
         Cells.java \
         CoordSet.java \
-        Direction.java\
-	Display.java\
-	Frame.java\
-	LevelData\
-	LevelMove\
-	Univers.java
-
+        Direction.java \
+        Display.java \
+        Frame.java \
+        LevelData.java \
+        LevelMove.java \
+        Univers.java
 
 default: classes
 
