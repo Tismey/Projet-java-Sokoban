@@ -28,7 +28,7 @@ public class Display extends JPanel {
         images.add(ImageIO.read(new File("wall.jpg")));
         images.add(ImageIO.read(new File("player.jpg")));
         images.add(ImageIO.read(new File("target.png")));
-        images.add(createImage(new Display()).getScaledInstance(100, 100, ABORT));
+        images.add(ImageIO.read(new File("world.png")));
     }
 
     public Display(Univers univ) throws IOException {
