@@ -2,12 +2,14 @@ import java.io.*;
 import java.util.*;
 
 public class LevelData {
-	private ArrayList<LevelMove> listData;
-	private String path;
+	private ArrayList<LevelMove> listData; // liste des niveaux
+	private String path; // nom du fichier
+	private static int numPlayerWorld; // numéro du monde du joueur (si le joueur n'est pas un monde par défaut = -8)
 
 	public LevelData(String path) {
 		this.listData = new ArrayList<LevelMove>();
 		this.path = path;
+		this.numPlayerWorld = -8;
 	}
 
 	/**
@@ -20,11 +22,12 @@ public class LevelData {
 			FileInputStream s = new FileInputStream(f);
 
 			int nbMonde = depthLevel(); // nbre de niveau
-			int numWorld = 0;
+			int numWorld = 0; // compteur de niveau
 
 			while (numWorld < nbMonde) {	
 				int [][] data;
-				int taille;
+				int taille, c1, c2, res;
+				int i = 0, j = 0, k = 0;
 				int outsideWorld = 0;
 				ArrayList<CoordSet> listTarget = new ArrayList<CoordSet>();
 
@@ -32,19 +35,26 @@ public class LevelData {
 
 				s.read(); // espace
 
-				taille = Character.getNumericValue((char)s.read()); // taille du niveau de numéro numWorld
-				
-				int res, k = 0; 
-				int i = 0, j = 0;
+				c1 = Character.getNumericValue((char)s.read()); // le premier chiffre
+
+				/* Si la taille de la matrice correspond à un nombre à 2 chiffres */
+				if ((res = (char)s.read()) != '\n') {
+					c2 = Character.getNumericValue(res);
+					taille = 10 * c1 + c2;
+					s.read(); // saut de ligne
+				}
+				else // sinon c'est un nombre à 1 chiffre
+					taille = c1;
 
 				data = new int[taille][taille];
 
-				s.read(); // saut de ligne
+				//s.read(); // saut de ligne
 				
 				/* Lecture et initialisation de la matrice du niveau de numéro numWorld */
 				while (k < (taille * taille) + taille) {
 					res = s.read();
 					
+					/* Si on a fini de récupérer les données sur une ligne on passe à la suivante */
 					if (j >= taille) {
 						i++;
 						j = 0;
@@ -99,14 +109,23 @@ public class LevelData {
 		try {
 			File f = new File(path);
 			FileInputStream s = new FileInputStream(f);
-			int i, taille;
+			int i, taille, c1, c2, tmp;
 			
 			while(s.read() != -1) {
 				s.read(); // espace
 				i = 0;
-				taille = Character.getNumericValue((char)s.read());
+				
+				c1 = Character.getNumericValue((char)s.read()); // le premier chiffre
 
-				s.read(); // saut de ligne
+				/* Si la taille de la matrice correspond à un nombre à 2 chiffres */
+				if ((tmp = (char)s.read()) != '\n') {
+					c2 = Character.getNumericValue(tmp);
+					taille = 10 * c1 + c2;
+					s.read(); // saut de ligne
+				} // sinon c'est un nombre à 1 chiffre
+				else
+					taille = c1;
+
 				
 				/* Lecture de la matrice du niveau */
 				while (i < (taille * taille) + taille) {
@@ -134,21 +153,35 @@ public class LevelData {
 		try {
 			File f = new File(path);
 			FileInputStream s = new FileInputStream(f);
-			int tmp, i, j, k = 0, taille;
+			int tmp, i, j, taille, c1, c2, res;
+			int k = 0; // compteur du nombre de monde
 			
 			while(k < nbMonde) {
 				j = 1;
-				tabName[k][0] = (char) s.read(); // initialisation avec le nom du niveau k
+				i = 0;
 
-				if (nbMonde == 1) {
+				tabName[k][0] = (char) s.read(); // initialisation avec le nom du niveau k
+				
+				/* Si c'est le joueur donc le joueur est un monde */
+				if (tabName[k][0] == 'A')
+					this.numPlayerWorld = k; 
+				
+				/* S'il n'y a qu'un seul monde pas besoin de continuer */
+				if (nbMonde == 1)
 					return tabName;
-				}
 
 				s.read(); // espace
-				i = 0;
-				taille = Character.getNumericValue((char)s.read());
+		
+				c1 = Character.getNumericValue((char)s.read()); // le premier chiffre
 
-				s.read(); // saut de ligne
+				/* Si la taille de la matrice correspond à un nombre à 2 chiffres */
+				if ((res = (char)s.read()) != '\n') {
+					c2 = Character.getNumericValue(res);
+					taille = 10 * c1 + c2;
+					s.read(); // saut de ligne
+				}
+				else // sinon c'est un nombre à 1 chiffre
+					taille = c1;
 				
 				/* Lecture et initialisation du tableau avec le nom des mondes présents dans le niveau k */
 				while (i < (taille * taille) + taille) {
@@ -161,7 +194,7 @@ public class LevelData {
 				}
 				s.read(); // saut de ligne
 				
-				/* On remplit le reste non utilisé par un caractère par défaut */
+				/* On remplit le reste non utilisé par un caractère par défaut (-> &) */
 				while (j < nbMonde) {
 					tabName[k][j] = '&';
 					j++;
@@ -173,7 +206,6 @@ public class LevelData {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-
 		return tabName;
 	}
 
@@ -184,12 +216,9 @@ public class LevelData {
 		int i;
 		char [][] tabName = getNameWorld(nbMonde);
 
-		for (i = 0; i < nbMonde; i++) {
-			if (nameWorld == tabName[i][0]) {
+		for (i = 0; i < nbMonde; i++)
+			if (nameWorld == tabName[i][0])
 				return i;
-			}
-		}
-
 		return -1;
 	}
 
@@ -200,13 +229,10 @@ public class LevelData {
 		int i, j;
 		char [][] tabName = getNameWorld(nbMonde);
 
-		for (i = 0; i < nbMonde; i++) {
-			for (j = 1; j < nbMonde; j++) {
-				if (tabName[i][j] == nameWorld) {
+		for (i = 0; i < nbMonde; i++)
+			for (j = 1; j < nbMonde; j++)
+				if (tabName[i][j] == nameWorld)
 					return i;
-				}
-			}
-		}
 		return 0;
 	} 
 
@@ -215,7 +241,7 @@ public class LevelData {
 	*/
 	public char getName(int numWorld) {
 		char [][] tabName = getNameWorld(depthLevel());
-
+		
 		return tabName[numWorld][0];
 	}
 
@@ -224,5 +250,12 @@ public class LevelData {
 	*/
 	public ArrayList<LevelMove> getListData() {
 		return this.listData;
+	}
+
+	/**
+		Renvoie le numéro du monde du joueur si le joueur est un monde
+	*/
+	public static int getNumPlayerWorld() {
+		return numPlayerWorld;
 	}
 }

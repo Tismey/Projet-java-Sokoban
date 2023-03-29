@@ -6,15 +6,15 @@ public class ApplicationSokoban {
     public static void main(String[] args) throws Exception {
         if (args.length != 2) {
             System.out.println("Argument non reconnu :(");
-            System.out.println(
-                    "Il faut 2 argument : \n1 - le mode de jeu (classique, récursive ...)\n2 - le nom du fichier de niveau (chemin absolu menant au fichier)");
+            System.out.println("Il faut 2 argument : \n1 - le mode de jeu (classique ou récursive)\n2 - le nom du fichier de niveau (chemin absolu menant au fichier si nécessaire)");
             return;
         }
 
         LevelData data = new LevelData(args[1]);
-        data.loadFromFile();
+        data.loadFromFile(); // on récupére les données du fichier
 
-        switch (args[0]) {
+        /* Séléction du mode de jeu */
+        switch(args[0]) {
             case "classique":
                 jeuClassique(data);
                 break;
@@ -25,15 +25,20 @@ public class ApplicationSokoban {
                 System.out.println("argument non reconnu");
                 break;
         }
-
         System.out.println("Fin du jeu");
     }
 
+    /**
+        Mode de jeu classique avec chainage
+    */
     public static void jeuClassique(LevelData data) throws Exception {
         LevelMove l = data.getListData().get(0);
+        
         l.displayInTerminal(data);
         // Display display = new Display(l, data);
         Frame frame = new Frame(l, data);
+
+        /* On continue le jeu tant que le niveau n'est pas réussi */
         while (!l.winConditionMet()) {
             BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 
@@ -68,20 +73,26 @@ public class ApplicationSokoban {
             l.displayInTerminal(data);
             frame.getDisplay().maj();
         }
+        /* Succès du niveau */
         System.out.println("Niveau réussi !");
     }
 
+    /**
+        Mode de jeu récursive avec les possibilités suivantes : chainage, poussette, absorbeur et le joueur est un monde
+    */
     public static void jeuRecursive(LevelData data) throws Exception {
         Univers univ = new Univers(data.getListData(), data.depthLevel());
-        int playerWorld;
+        int playerWorld, numRes;
         int numMove, initMove = 0;
+        CoordSet resC = new CoordSet(0, 0);
+        
+        univ.initWorldAcces(); // initialisation des 2 tableaux pour les accès aux mondes 
 
-        univ.initWorldAcces();
+        playerWorld = univ.getPlayerSpawnWorld(); // on récupère le numéro du monde où se trouve le joueur
 
-        playerWorld = univ.getPlayerSpawnWorld();
+        univ.getUnivers().get(playerWorld).displayInTerminal(data); // affichage de ce monde en ascii 
 
-        univ.getUnivers().get(playerWorld).displayInTerminal(data);
-
+        /* On continue le jeu tant que le niveau n'est pas réussi */
         while (!univ.winConditionMetUniv()) {
             BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 
@@ -93,41 +104,85 @@ public class ApplicationSokoban {
             System.out.println("");
 
             switch (cl) {
-                case "h":
-                    if (univ.checkMovePossible(univ.getUnivers().get(playerWorld).playerSpawn(), Direction.GAUCHE,
-                            univ.getUnivers().get(playerWorld))) {
-                        numMove = univ.getNumMove(univ.getUnivers().get(playerWorld).playerSpawn(), Direction.GAUCHE,
-                                univ.getUnivers().get(playerWorld), initMove);
-                        univ.move(univ.getUnivers().get(playerWorld).playerSpawn(), Direction.GAUCHE,
-                                univ.getUnivers().get(playerWorld), numMove);
+                case "h" : 
+                    /* On récupére un numéro de monde */
+                    numRes = univ.getLevelPockableMove(univ.getUnivers().get(playerWorld).playerSpawn(), Direction.GAUCHE, univ.getUnivers().get(playerWorld), univ.getUnivers().get(playerWorld), resC);
+                    /* S'il est valable alors on essaye de faire un mouvement avec poussette */
+                    if (numRes >= 0) {
+                        if ((numMove = univ.getNumPockableMove(univ.getUnivers().get(playerWorld).playerSpawn(), Direction.GAUCHE, univ.getUnivers().get(playerWorld), univ.getUnivers().get(playerWorld), initMove)) > 0)
+                            univ.pockableMove(resC, Direction.GAUCHE, univ.getUnivers().get(numRes), numMove);
                     }
+                    /* Mouvement pour un joueur monde */
+                    else if (univ.getUnivers().get(playerWorld).playerIsAWorld() && univ.checkMovePossible(univ.getUnivers().get(playerWorld).playerSpawn(), Direction.GAUCHE, univ.getUnivers().get(playerWorld))) {
+                        numMove = univ.getNumMove(univ.getUnivers().get(playerWorld).playerSpawn(), Direction.GAUCHE, univ.getUnivers().get(playerWorld), initMove);
+                        univ.playerWorldMove(univ.getUnivers().get(playerWorld).playerSpawn(), Direction.GAUCHE, univ.getUnivers().get(playerWorld),numMove);
+                    }
+                    /* Mouvement pour un joueur simple */
+                    else if (univ.checkMovePossible(univ.getUnivers().get(playerWorld).playerSpawn(), Direction.GAUCHE, univ.getUnivers().get(playerWorld))) {
+                        numMove = univ.getNumMove(univ.getUnivers().get(playerWorld).playerSpawn(), Direction.GAUCHE, univ.getUnivers().get(playerWorld), initMove);
+                        univ.move(univ.getUnivers().get(playerWorld).playerSpawn(), Direction.GAUCHE, univ.getUnivers().get(playerWorld),numMove);
+                    }
+                    /* Sinon pas de mouvement possible */
                     break;
-                case "k":
-                    if (univ.checkMovePossible(univ.getUnivers().get(playerWorld).playerSpawn(), Direction.HAUT,
-                            univ.getUnivers().get(playerWorld))) {
-                        numMove = univ.getNumMove(univ.getUnivers().get(playerWorld).playerSpawn(), Direction.HAUT,
-                                univ.getUnivers().get(playerWorld), initMove);
-                        univ.move(univ.getUnivers().get(playerWorld).playerSpawn(), Direction.HAUT,
-                                univ.getUnivers().get(playerWorld), numMove);
+                case "k" : 
+                    /* On récupére un numéro de monde */
+                    numRes = univ.getLevelPockableMove(univ.getUnivers().get(playerWorld).playerSpawn(), Direction.HAUT, univ.getUnivers().get(playerWorld), univ.getUnivers().get(playerWorld), resC);
+                    /* S'il est valable alors on essaye de faire un mouvement avec poussette */
+                    if (numRes >= 0) {
+                        if ((numMove = univ.getNumPockableMove(univ.getUnivers().get(playerWorld).playerSpawn(), Direction.HAUT, univ.getUnivers().get(playerWorld), univ.getUnivers().get(playerWorld), initMove)) > 0)
+                            univ.pockableMove(resC, Direction.HAUT, univ.getUnivers().get(numRes), numMove);
                     }
+                    /* Mouvement pour un joueur monde */
+                    else if (univ.getUnivers().get(playerWorld).playerIsAWorld() && univ.checkMovePossible(univ.getUnivers().get(playerWorld).playerSpawn(), Direction.HAUT, univ.getUnivers().get(playerWorld))) {
+                        numMove = univ.getNumMove(univ.getUnivers().get(playerWorld).playerSpawn(), Direction.HAUT, univ.getUnivers().get(playerWorld), initMove);
+                        univ.playerWorldMove(univ.getUnivers().get(playerWorld).playerSpawn(), Direction.HAUT, univ.getUnivers().get(playerWorld),numMove);
+                    }
+                    /* Mouvement pour un joueur simple */
+                    else if (univ.checkMovePossible(univ.getUnivers().get(playerWorld).playerSpawn(), Direction.HAUT, univ.getUnivers().get(playerWorld))) { 
+                        numMove = univ.getNumMove(univ.getUnivers().get(playerWorld).playerSpawn(), Direction.HAUT, univ.getUnivers().get(playerWorld), initMove);
+                        univ.move(univ.getUnivers().get(playerWorld).playerSpawn(), Direction.HAUT, univ.getUnivers().get(playerWorld),numMove);
+                    }
+                    /* Sinon pas de mouvement possible */
                     break;
-                case "l":
-                    if (univ.checkMovePossible(univ.getUnivers().get(playerWorld).playerSpawn(), Direction.DROITE,
-                            univ.getUnivers().get(playerWorld))) {
-                        numMove = univ.getNumMove(univ.getUnivers().get(playerWorld).playerSpawn(), Direction.DROITE,
-                                univ.getUnivers().get(playerWorld), initMove);
-                        univ.move(univ.getUnivers().get(playerWorld).playerSpawn(), Direction.DROITE,
-                                univ.getUnivers().get(playerWorld), numMove);
+                case "l" : 
+                    /* On récupére un numéro de monde */
+                    numRes = univ.getLevelPockableMove(univ.getUnivers().get(playerWorld).playerSpawn(), Direction.DROITE, univ.getUnivers().get(playerWorld), univ.getUnivers().get(playerWorld), resC);
+                    /* S'il est valable alors on essaye de faire un mouvement avec poussette */
+                    if (numRes >= 0) {
+                        if ((numMove = univ.getNumPockableMove(univ.getUnivers().get(playerWorld).playerSpawn(), Direction.DROITE, univ.getUnivers().get(playerWorld), univ.getUnivers().get(playerWorld), initMove)) > 0)
+                            univ.pockableMove(resC, Direction.DROITE, univ.getUnivers().get(numRes), numMove);
                     }
+                    /* Mouvement pour un joueur monde */
+                    else if (univ.getUnivers().get(playerWorld).playerIsAWorld() && univ.checkMovePossible(univ.getUnivers().get(playerWorld).playerSpawn(), Direction.DROITE, univ.getUnivers().get(playerWorld))) {
+                        numMove = univ.getNumMove(univ.getUnivers().get(playerWorld).playerSpawn(), Direction.DROITE, univ.getUnivers().get(playerWorld), initMove);
+                        univ.playerWorldMove(univ.getUnivers().get(playerWorld).playerSpawn(), Direction.DROITE, univ.getUnivers().get(playerWorld),numMove);
+                    }
+                    /* Mouvement pour un joueur simple */
+                    else if (univ.checkMovePossible(univ.getUnivers().get(playerWorld).playerSpawn(), Direction.DROITE, univ.getUnivers().get(playerWorld))) {
+                        numMove = univ.getNumMove(univ.getUnivers().get(playerWorld).playerSpawn(), Direction.DROITE, univ.getUnivers().get(playerWorld), initMove);
+                        univ.move(univ.getUnivers().get(playerWorld).playerSpawn(), Direction.DROITE, univ.getUnivers().get(playerWorld), numMove);
+                    }
+                    /* Sinon pas de mouvement possible */
                     break;
-                case "j":
-                    if (univ.checkMovePossible(univ.getUnivers().get(playerWorld).playerSpawn(), Direction.BAS,
-                            univ.getUnivers().get(playerWorld))) {
-                        numMove = univ.getNumMove(univ.getUnivers().get(playerWorld).playerSpawn(), Direction.BAS,
-                                univ.getUnivers().get(playerWorld), initMove);
-                        univ.move(univ.getUnivers().get(playerWorld).playerSpawn(), Direction.BAS,
-                                univ.getUnivers().get(playerWorld), numMove);
+                case "j" : 
+                    /* On récupére un numéro de monde */
+                    numRes = univ.getLevelPockableMove(univ.getUnivers().get(playerWorld).playerSpawn(), Direction.BAS, univ.getUnivers().get(playerWorld), univ.getUnivers().get(playerWorld), resC);
+                    /* S'il est valable alors on essaye de faire un mouvement avec poussette */
+                    if (numRes >= 0) {
+                        if ((numMove = univ.getNumPockableMove(univ.getUnivers().get(playerWorld).playerSpawn(), Direction.BAS, univ.getUnivers().get(playerWorld), univ.getUnivers().get(playerWorld), initMove)) > 0)
+                            univ.pockableMove(resC, Direction.BAS, univ.getUnivers().get(numRes), numMove);   
                     }
+                    /* Mouvement pour un joueur monde */
+                    else if (univ.getUnivers().get(playerWorld).playerIsAWorld() && univ.checkMovePossible(univ.getUnivers().get(playerWorld).playerSpawn(), Direction.BAS, univ.getUnivers().get(playerWorld))) {
+                        numMove = univ.getNumMove(univ.getUnivers().get(playerWorld).playerSpawn(), Direction.BAS, univ.getUnivers().get(playerWorld), initMove);
+                        univ.playerWorldMove(univ.getUnivers().get(playerWorld).playerSpawn(), Direction.BAS, univ.getUnivers().get(playerWorld),numMove);
+                    }
+                    /* Mouvement pour un joueur simple */
+                    else if (univ.checkMovePossible(univ.getUnivers().get(playerWorld).playerSpawn(), Direction.BAS, univ.getUnivers().get(playerWorld))) {
+                        numMove = univ.getNumMove(univ.getUnivers().get(playerWorld).playerSpawn(), Direction.BAS, univ.getUnivers().get(playerWorld), initMove);
+                        univ.move(univ.getUnivers().get(playerWorld).playerSpawn(), Direction.BAS, univ.getUnivers().get(playerWorld),numMove);                 
+                    }
+                    /* Sinon pas de mouvement possible */
                     break;
                 default:
                     System.out.println("Mauvaise touche !");
@@ -135,8 +190,12 @@ public class ApplicationSokoban {
 
             playerWorld = univ.getPlayerSpawnWorld();
             univ.getUnivers().get(playerWorld).displayInTerminal(data);
-            univ.resetWorldAcces();
+            univ.resetWorldAcces(); // on réinitialise les accès aux mondes
         }
+        /* Succès du niveau */
         System.out.println("Niveau réussi !");
     }
 }
+
+
+
