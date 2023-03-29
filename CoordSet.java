@@ -86,7 +86,7 @@ public class CoordSet {
 	/**
 		Renvoie les coordonnées d'un ajout vers la direction d
 	*/
-	public static CoordSet dirToVec(Direction d){
+	public static CoordSet dirToVec(Direction d) {
 		if (d == Direction.HAUT) {
 			return new CoordSet(-1, 0);
 		}
@@ -105,12 +105,13 @@ public class CoordSet {
 	/**
 		Renvoie les coordonnées de la somme des coordonnées a et b
 	*/
-	public static CoordSet addVec(CoordSet a, CoordSet b){
+	public static CoordSet addVec(CoordSet a, CoordSet b) {
 		return new CoordSet(a.getX() + b.getX(), a.getY() + b.getY());
 	}
 
     /**
 		Renvoie true si o est un type CoordSet et que les coordonnées de o sont égaux à ses coordonnées
+		Sinon renvoie false
     */
     public boolean equals(Object o) {
     	if (!(o instanceof CoordSet)) {
@@ -125,7 +126,7 @@ public class CoordSet {
     /**
 		Renvoie la direction opposée à la direction d
     */	
-	public static Direction revDirection(Direction d){
+	public static Direction revDirection(Direction d) {
         if (d == Direction.HAUT) {
 			return Direction.BAS;
 		}
