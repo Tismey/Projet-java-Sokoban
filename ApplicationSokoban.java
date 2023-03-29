@@ -26,6 +26,7 @@ public class ApplicationSokoban {
                 break;
         }
         System.out.println("Fin du jeu");
+        System.exit(0);
     }
 
     /**
@@ -36,7 +37,7 @@ public class ApplicationSokoban {
         
         l.displayInTerminal(data);
         // Display display = new Display(l, data);
-        Frame frame = new Frame(l, data);
+        Frame frame = new Frame(l);
 
         /* On continue le jeu tant que le niveau n'est pas réussi */
         while (!l.winConditionMet()) {
@@ -91,12 +92,13 @@ public class ApplicationSokoban {
         playerWorld = univ.getPlayerSpawnWorld(); // on récupère le numéro du monde où se trouve le joueur
 
         univ.getUnivers().get(playerWorld).displayInTerminal(data); // affichage de ce monde en ascii 
+        Frame frame = new Frame(univ.getUnivers().get(playerWorld));
 
         /* On continue le jeu tant que le niveau n'est pas réussi */
         while (!univ.winConditionMetUniv()) {
             BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 
-            System.out.println("Utiliser touche h pour aller à gauche, k (en haut), j (en bas), l (à droite)");
+            System.out.println("Utiliser touche q pour aller à gauche, z (en haut), s (en bas), d (à droite)");
 
             System.out.print("--> ");
 
@@ -104,7 +106,7 @@ public class ApplicationSokoban {
             System.out.println("");
 
             switch (cl) {
-                case "h" : 
+                case "q" : 
                     /* On récupére un numéro de monde */
                     numRes = univ.getLevelPockableMove(univ.getUnivers().get(playerWorld).playerSpawn(), Direction.GAUCHE, univ.getUnivers().get(playerWorld), univ.getUnivers().get(playerWorld), resC);
                     /* S'il est valable alors on essaye de faire un mouvement avec poussette */
@@ -124,7 +126,7 @@ public class ApplicationSokoban {
                     }
                     /* Sinon pas de mouvement possible */
                     break;
-                case "k" : 
+                case "z" : 
                     /* On récupére un numéro de monde */
                     numRes = univ.getLevelPockableMove(univ.getUnivers().get(playerWorld).playerSpawn(), Direction.HAUT, univ.getUnivers().get(playerWorld), univ.getUnivers().get(playerWorld), resC);
                     /* S'il est valable alors on essaye de faire un mouvement avec poussette */
@@ -144,7 +146,7 @@ public class ApplicationSokoban {
                     }
                     /* Sinon pas de mouvement possible */
                     break;
-                case "l" : 
+                case "d" : 
                     /* On récupére un numéro de monde */
                     numRes = univ.getLevelPockableMove(univ.getUnivers().get(playerWorld).playerSpawn(), Direction.DROITE, univ.getUnivers().get(playerWorld), univ.getUnivers().get(playerWorld), resC);
                     /* S'il est valable alors on essaye de faire un mouvement avec poussette */
@@ -164,7 +166,7 @@ public class ApplicationSokoban {
                     }
                     /* Sinon pas de mouvement possible */
                     break;
-                case "j" : 
+                case "s" : 
                     /* On récupére un numéro de monde */
                     numRes = univ.getLevelPockableMove(univ.getUnivers().get(playerWorld).playerSpawn(), Direction.BAS, univ.getUnivers().get(playerWorld), univ.getUnivers().get(playerWorld), resC);
                     /* S'il est valable alors on essaye de faire un mouvement avec poussette */
@@ -190,6 +192,8 @@ public class ApplicationSokoban {
 
             playerWorld = univ.getPlayerSpawnWorld();
             univ.getUnivers().get(playerWorld).displayInTerminal(data);
+            frame.dispose();
+            frame = new Frame(univ.getUnivers().get(playerWorld));
             univ.resetWorldAcces(); // on réinitialise les accès aux mondes
         }
         /* Succès du niveau */
