@@ -13,11 +13,11 @@ CLASSES = \
         Cells.java \
         CoordSet.java \
         Direction.java\
-		Display.java\
-		Frame.java\
-		LevelData\
-		LevelMove\
-		Univers.java
+	Display.java\
+	Frame.java\
+	LevelData\
+	LevelMove\
+	Univers.java
 
 
 default: classes
