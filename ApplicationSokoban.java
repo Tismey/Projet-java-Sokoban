@@ -9,7 +9,6 @@ public class ApplicationSokoban {
     public static void main(String[] args) throws Exception {
         if (args.length != 3) {
             System.out.println("Argument non reconnu :(");
-            //System.out.println("Il faut 2 argument : \n1 - le mode de jeu (classique ou récursive)\n2 - le nom du fichier de niveau (chemin absolu menant au fichier si nécessaire)");
             System.out.println("1 - le mode de jeu (classique ou récursive)");
             System.out.println("2 - le type d'affichage (ascii ou graphique)");
             System.out.println("3 - le nom du fichier de niveau (chemin absolu menant au fichier si nécessaire)");
@@ -86,45 +85,6 @@ public class ApplicationSokoban {
             }
 
             l.displayInTerminal(data);
-            //frame.getDisplay().maj();
-            
-        /*    switch(typeAff) {
-                case "ascii":
-                    BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-
-                    System.out.println("Utiliser touche q pour aller à gauche, z (en haut), s (en bas), d (à droite)");
-
-                    System.out.print("--> ");
-
-                    String cl = br.readLine();
-                    System.out.println("");
-                
-                    switch (cl) {
-                        case "q":
-                            if (l.checkForMove(l.playerSpawn(), Direction.GAUCHE))
-                                l.move(l.playerSpawn(), Direction.GAUCHE);
-                            break;
-                        case "z":
-                            if (l.checkForMove(l.playerSpawn(), Direction.HAUT))
-                                l.move(l.playerSpawn(), Direction.HAUT);
-                            break;
-                        case "d":
-                            if (l.checkForMove(l.playerSpawn(), Direction.DROITE))
-                                l.move(l.playerSpawn(), Direction.DROITE);
-                            break;
-                        case "s":
-                            if (l.checkForMove(l.playerSpawn(), Direction.BAS))
-                                l.move(l.playerSpawn(), Direction.BAS);
-                            break;
-                        default:
-                            System.out.println("Mauvaise touche !");
-                    }
-
-                    l.displayInTerminal(data);
-                    break;
-                case "graphique":
-                    break;
-            }*/
         }
         /* Succès du niveau */
         System.out.println("Niveau réussi !");
@@ -144,10 +104,6 @@ public class ApplicationSokoban {
         univ.initWorldAcces(); // initialisation des 2 tableaux pour les accès aux mondes 
 
         playerWorld = univ.getPlayerSpawnWorld(); // on récupère le numéro du monde où se trouve le joueur
-        /*
-        univ.getUnivers().get(playerWorld).displayInTerminal(data); // affichage de ce monde en ascii 
-        //Frame frame = new Frame(univ.getUnivers().get(playerWorld));
-        Frame frame = new Frame(univ);*/
 
         switch(typeAff) {
             case "ascii":
@@ -259,8 +215,6 @@ public class ApplicationSokoban {
 
             playerWorld = univ.getPlayerSpawnWorld();
             univ.getUnivers().get(playerWorld).displayInTerminal(data);
-
-            //frame.majFrame(univ);
 
             univ.resetWorldAcces(); // on réinitialise les accès aux mondes
         }
