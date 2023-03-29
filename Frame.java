@@ -19,6 +19,7 @@ public class Frame extends JFrame implements KeyListener{
         add(display);
         addKeyListener(this);
         setSize(1920, 1080);
+        setExtendedState(JFrame.MAXIMIZED_BOTH); 
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setVisible(true);
     }
@@ -96,6 +97,7 @@ public class Frame extends JFrame implements KeyListener{
             }
         });
         setSize(1920, 1080);
+        setExtendedState(JFrame.MAXIMIZED_BOTH);  
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setVisible(true);
     }
@@ -244,6 +246,7 @@ public class Frame extends JFrame implements KeyListener{
             }
         });
         setSize(1920, 1080);
+        setExtendedState(JFrame.MAXIMIZED_BOTH); 
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setVisible(true);
     }
