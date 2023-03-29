@@ -529,7 +529,6 @@ public class Univers {
 						tmpCell2 = tmpMat[o.getX()][o.getY()];
 						/* On inverse la direction */
 						d = CoordSet.revDirection(d);
-						n--;
 					}
 					/* Accès impossible au monde on s'arrête */
 					else 
@@ -709,7 +708,6 @@ public class Univers {
 							tmpCell2 = tmpMat[o.getX()][o.getY()];
 							/* On inverse la direction */
 							d = CoordSet.revDirection(d);
-							n--;
 						}	
 						else if (worldAcces[tmpMat[o.getX()][o.getY()]] >= 1) {
 							/* On récupère le monde où on veut entrer du niveau courant */
@@ -747,7 +745,6 @@ public class Univers {
 							tmpCell2 = tmpMat[o.getX()][o.getY()];
 							/* On inverse la direction */
 							d = CoordSet.revDirection(d);
-							n--;
 						}
 						/* Sinon mouvement simple */
 						else {
