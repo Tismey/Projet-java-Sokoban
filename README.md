@@ -27,6 +27,8 @@ inclus dans se repertoire sont:
     option pour <param1>:
         -"classique"
         -"récursive"
+        -"ascii"
+        -"graphique"
     
     option pour <param2>
         - vous devez écrire le chemin du niveaux que vous voulez ouvrire (chemin relatif) ex: "FichierNiveauxPerso/nivClassique"
@@ -39,6 +41,7 @@ inclus dans se repertoire sont:
         "s" : mouvement BAS
     interaction interface graphique:
         utiliser les flèches directionelles
+        NOTE : ne marche pas avec l'option "récursif" il faut utiliser le terminal (l'interface graphique représente quand meme les changements)
 
 ## NOTE/PRESENTATION ##
     Le jeu est dans l'idée, sensée avoir le meme gameplay que le jeu "PATRICK'S PARABOX", et il respecte scrupuleusement les spécifications CASL données sur le moodle;
