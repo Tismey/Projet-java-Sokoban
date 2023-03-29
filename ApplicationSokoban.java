@@ -92,7 +92,8 @@ public class ApplicationSokoban {
         playerWorld = univ.getPlayerSpawnWorld(); // on récupère le numéro du monde où se trouve le joueur
 
         univ.getUnivers().get(playerWorld).displayInTerminal(data); // affichage de ce monde en ascii 
-        Frame frame = new Frame(univ.getUnivers().get(playerWorld));
+        //Frame frame = new Frame(univ.getUnivers().get(playerWorld));
+        Frame frame = new Frame(univ);
 
         /* On continue le jeu tant que le niveau n'est pas réussi */
         while (!univ.winConditionMetUniv()) {
@@ -192,8 +193,7 @@ public class ApplicationSokoban {
 
             playerWorld = univ.getPlayerSpawnWorld();
             univ.getUnivers().get(playerWorld).displayInTerminal(data);
-            frame.dispose();
-            frame = new Frame(univ.getUnivers().get(playerWorld));
+            frame.majFrame(univ);
             univ.resetWorldAcces(); // on réinitialise les accès aux mondes
         }
         /* Succès du niveau */
