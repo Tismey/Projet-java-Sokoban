@@ -24,7 +24,7 @@ public class Display extends JPanel {
         l = level;
         images = new ArrayList<>();
         images.add(ImageIO.read(new File("box.png")));
-        images.add(ImageIO.read(new File("wall.jpg")));
+        images.add(ImageIO.read(new File("wall.png")));
         images.add(ImageIO.read(new File("player.png")));
         images.add(ImageIO.read(new File("target.png")));
     }
@@ -35,7 +35,7 @@ public class Display extends JPanel {
         
         images = new ArrayList<>();
         images.add(ImageIO.read(new File("box.png")));
-        images.add(ImageIO.read(new File("wall.jpg")));
+        images.add(ImageIO.read(new File("wall.png")));
         images.add(ImageIO.read(new File("player.png")));
         images.add(ImageIO.read(new File("target.png")));
         images.add(ImageIO.read(new File("world.png")));
@@ -58,7 +58,7 @@ public class Display extends JPanel {
                     g.drawImage(images.get(3), j * images.get(3).getWidth(null), i * images.get(3).getHeight(null), null);
                 else if (l.getLevelData(i, j) >= 0){
                         g.drawRect(j * images.get(2).getWidth(null), i * images.get(3).getHeight(null), images.get(0).getWidth(null), images.get(0).getHeight(null));
-                        g.setColor(Color.RED);
+                        g.setColor(Color.DARK_GRAY);
                         g.fillRect(j * images.get(2).getWidth(null), i * images.get(3).getHeight(null), images.get(0).getWidth(null), images.get(0).getHeight(null));
                         LevelMove l2 = u.getUnivers().get(l.getLevelData(i, j));
                         for (int t = 0; t < l2.getSizeMat();t++) {
