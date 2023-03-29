@@ -12,7 +12,7 @@ public class Maps{
         incr = 0;
     }
 
-    public Maps(ArrayList<Level> ar){
+    public Maps(ArrayList<LevelMove> ar){
         levels = ar;
         numDepth = ar.size();
         incr = 0;

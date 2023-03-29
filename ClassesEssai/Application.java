@@ -1,6 +1,6 @@
 
 
-public class Application{
+public class Application {
     private Strings args[];
 
     public Application(Strings args[]){
