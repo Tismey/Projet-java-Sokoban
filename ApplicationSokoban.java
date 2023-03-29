@@ -2,24 +2,29 @@ import java.awt.event.KeyEvent;
 import java.io.*;
 import java.util.*;
 
+/**
+    Classe permettant de lancer le jeu   
+*/
 public class ApplicationSokoban {
     public static void main(String[] args) throws Exception {
-        if (args.length != 2) {
+        if (args.length != 3) {
             System.out.println("Argument non reconnu :(");
-            System.out.println("Il faut 2 argument : \n1 - le mode de jeu (classique ou récursive)\n2 - le nom du fichier de niveau (chemin absolu menant au fichier si nécessaire)");
+            System.out.println("1 - le mode de jeu (classique ou récursive)");
+            System.out.println("2 - le type d'affichage (ascii ou graphique)");
+            System.out.println("3 - le nom du fichier de niveau (chemin absolu menant au fichier si nécessaire)");
             return;
         }
 
-        LevelData data = new LevelData(args[1]);
+        LevelData data = new LevelData(args[2]);
         data.loadFromFile(); // on récupére les données du fichier
 
         /* Séléction du mode de jeu */
         switch(args[0]) {
             case "classique":
-                jeuClassique(data);
+                jeuClassique(data, args[1]);
                 break;
             case "récursive":
-                jeuRecursive(data);
+                jeuRecursive(data, args[1]);
                 break;
             default:
                 System.out.println("argument non reconnu");
@@ -32,15 +37,23 @@ public class ApplicationSokoban {
     /**
         Mode de jeu classique avec chainage
     */
-    public static void jeuClassique(LevelData data) throws Exception {
+    public static void jeuClassique(LevelData data, String typeAff) throws Exception {
         LevelMove l = data.getListData().get(0);
-        
-        l.displayInTerminal(data);
-        // Display display = new Display(l, data);
-        Frame frame = new Frame(l);
-
+        Frame frame = null;
+    
+        switch(typeAff) {
+            case "ascii":
+                l.displayInTerminal(data);
+                break;
+            case "graphique":
+                frame = new Frame(l);
+                break;
+            default:
+                System.out.println("argument non reconnu");
+                return;
+        }
         /* On continue le jeu tant que le niveau n'est pas réussi */
-        while (!l.winConditionMet()) {
+        while (!l.winConditionMet()) {   
             BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 
             System.out.println("Utiliser touche q pour aller à gauche, z (en haut), s (en bas), d (à droite)");
@@ -49,7 +62,7 @@ public class ApplicationSokoban {
 
             String cl = br.readLine();
             System.out.println("");
-
+        
             switch (cl) {
                 case "q":
                     if (l.checkForMove(l.playerSpawn(), Direction.GAUCHE))
@@ -72,7 +85,6 @@ public class ApplicationSokoban {
             }
 
             l.displayInTerminal(data);
-            frame.getDisplay().maj();
         }
         /* Succès du niveau */
         System.out.println("Niveau réussi !");
@@ -81,8 +93,10 @@ public class ApplicationSokoban {
     /**
         Mode de jeu récursive avec les possibilités suivantes : chainage, poussette, absorbeur et le joueur est un monde
     */
-    public static void jeuRecursive(LevelData data) throws Exception {
+    public static void jeuRecursive(LevelData data, String typeAff) throws Exception {
         Univers univ = new Univers(data.getListData(), data.depthLevel());
+        Frame frame = null;
+        
         int playerWorld, numRes;
         int numMove, initMove = 0;
         CoordSet resC = new CoordSet(0, 0);
@@ -91,9 +105,17 @@ public class ApplicationSokoban {
 
         playerWorld = univ.getPlayerSpawnWorld(); // on récupère le numéro du monde où se trouve le joueur
 
-        univ.getUnivers().get(playerWorld).displayInTerminal(data); // affichage de ce monde en ascii 
-        //Frame frame = new Frame(univ.getUnivers().get(playerWorld));
-        Frame frame = new Frame(univ);
+        switch(typeAff) {
+            case "ascii":
+                univ.getUnivers().get(playerWorld).displayInTerminal(data);
+                break;
+            case "graphique":
+                frame = new Frame(univ);
+                break;
+            default:
+                System.out.println("argument non reconnu");
+                return;
+        }
 
         /* On continue le jeu tant que le niveau n'est pas réussi */
         while (!univ.winConditionMetUniv()) {
@@ -193,7 +215,7 @@ public class ApplicationSokoban {
 
             playerWorld = univ.getPlayerSpawnWorld();
             univ.getUnivers().get(playerWorld).displayInTerminal(data);
-            frame.majFrame(univ);
+
             univ.resetWorldAcces(); // on réinitialise les accès aux mondes
         }
         /* Succès du niveau */
