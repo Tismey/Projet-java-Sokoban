@@ -65,18 +65,19 @@ public class Display extends JPanel {
                     g.drawImage(images.get(2), j * images.get(2).getWidth(null), i * images.get(2).getHeight(null), null);
                 else if (l.getListTarget().contains(new CoordSet(i, j)))
                     g.drawImage(images.get(3), j * images.get(3).getWidth(null), i * images.get(3).getHeight(null), null);
-                if (l.getLevelData(i, j) >= 0){
+                // PARTIE POUR DESSINER LES SOUS NIVEAUX
+                else if (l.getLevelData(i, j) >= 0){
                     LevelMove l2 = u.getUnivers().get(l.getLevelData(i, j));
                     for (int t = 0; t < l2.getSizeMat();t++) {
                         for (int r = 0; r < l2.getSizeMat(); r++) {
                             if (l2.getLevelData(i, j) == Cells.BOITE)
-                                g.drawImage(images.get(0), j*images.get(0).getWidth(null) + r*images.get(0).getWidth(null)/l2.getSizeMat(), i * images.get(0).getHeight(null) + t*images.get(0).getHeight(null)/l2.getSizeMat(),images.get(0).getWidth(null)/l2.getSizeMat(),images.get(0).getHeight(null)/l2.getSizeMat(),null);
-                            else if (l.getLevelData(i, j) == Cells.MUR)
-                                g.drawImage(images.get(1), j*images.get(1).getWidth(null) + r*images.get(1).getWidth(null)/l2.getSizeMat(), i * images.get(1).getHeight(null) + t*images.get(1).getHeight(null)/l2.getSizeMat(),images.get(1).getWidth(null)/l2.getSizeMat(),images.get(1).getHeight(null)/l2.getSizeMat(),null);
-                            else if (l.getLevelData(i, j) == Cells.JOUEUR)
-                                g.drawImage(images.get(2), j*images.get(2).getWidth(null) + r*images.get(2).getWidth(null)/l2.getSizeMat(), i * images.get(2).getHeight(null) + t*images.get(2).getHeight(null)/l2.getSizeMat(),images.get(2).getWidth(null)/l2.getSizeMat(),images.get(2).getHeight(null)/l2.getSizeMat(),null);
-                            else if (l.getListTarget().contains(new CoordSet(i, j)))
-                                g.drawImage(images.get(3), j*images.get(3).getWidth(null) + r*images.get(3).getWidth(null)/l2.getSizeMat(), i * images.get(3).getHeight(null) + t*images.get(3).getHeight(null)/l2.getSizeMat(),images.get(3).getWidth(null)/l2.getSizeMat(),images.get(3).getHeight(null)/l2.getSizeMat(),null);
+                                g.drawImage(images.get(0), j*images.get(0).getWidth(null) + r*images.get(0).getWidth(null)/l2.getSizeMat(), i * images.get(0).getHeight(null) + t*images.get(0).getHeight(null)/l2.getSizeMat(), images.get(0).getWidth(null)/l2.getSizeMat(),images.get(0).getHeight(null)/l2.getSizeMat(),null);
+                            else if (l2.getLevelData(i, j) == Cells.MUR)
+                                g.drawImage(images.get(1), j*images.get(1).getWidth(null) + r*images.get(1).getWidth(null)/l2.getSizeMat(), i * images.get(1).getHeight(null) + t*images.get(1).getHeight(null)/l2.getSizeMat(), images.get(1).getWidth(null)/l2.getSizeMat(),images.get(1).getHeight(null)/l2.getSizeMat(),null);
+                            else if (l2.getLevelData(i, j) == Cells.JOUEUR)
+                                g.drawImage(images.get(2), j*images.get(2).getWidth(null) + r*images.get(2).getWidth(null)/l2.getSizeMat(), i * images.get(2).getHeight(null) + t*images.get(2).getHeight(null)/l2.getSizeMat(), images.get(2).getWidth(null)/l2.getSizeMat(),images.get(2).getHeight(null)/l2.getSizeMat(),null);
+                            else if (l2.getListTarget().contains(new CoordSet(i, j)))
+                                g.drawImage(images.get(3), j*images.get(3).getWidth(null) + r*images.get(3).getWidth(null)/l2.getSizeMat(), i * images.get(3).getHeight(null) + t*images.get(3).getHeight(null)/l2.getSizeMat(), images.get(3).getWidth(null)/l2.getSizeMat(),images.get(3).getHeight(null)/l2.getSizeMat(),null);
                         }
                     }
                 }
