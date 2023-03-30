@@ -106,11 +106,15 @@ public class Display extends JPanel {
         this.update(getGraphics());
         this.repaint();
     }
+
+    public void maj(Univers univ){
+        u = univ;
+        l = univ.getUnivers().get(univ.getPlayerSpawnWorld());
+        this.update(getGraphics());
+        this.repaint();
+    }
        
     public ArrayList<Image> getImages(){
         return images;
     }
 }
-
-
-
