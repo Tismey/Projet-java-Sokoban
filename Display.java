@@ -80,7 +80,7 @@ public class Display extends JPanel {
                     }                  
                 }
                 else if (l.getListTarget().contains(new CoordSet(i, j)) && !l.isAWorld(i, j))
-                    g.drawImage(images.get(3), ofx +j * images.get(3).getWidth(null), i * images.get(3).getHeight(null), null);
+                    g.drawImage(images.get(3), ofx +j * images.get(3).getWidth(null),ofy + i * images.get(3).getHeight(null), null);
                 else if (l.getLevelData(i, j) >= 0){
                         g.drawRect(ofx +j * images.get(2).getWidth(null),ofy + i * images.get(3).getHeight(null), images.get(0).getWidth(null), images.get(0).getHeight(null));
                         g.setColor(Color.DARK_GRAY);
