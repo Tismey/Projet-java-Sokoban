@@ -17,11 +17,13 @@ public class Display extends JPanel {
     public Display() throws IOException {
         l = new LevelMove(6);
         images = new ArrayList<>();
+        u = null;
         add(new JLabel("rien"));
     }
 
     public Display(LevelMove level) throws IOException {
         l = level;
+        u = null;
         images = new ArrayList<>();
         images.add(ImageIO.read(new File("box.png")));
         images.add(ImageIO.read(new File("wall.png")));
@@ -44,7 +46,7 @@ public class Display extends JPanel {
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
         this.setBackground(Color.BLACK);
-        g.setColor(Color.BLACK);
+        g.setColor(Color.GRAY);
         g.drawRect(0, 0, images.get(0).getWidth(null) * l.getSizeMat(), images.get(0).getHeight(null) * l.getSizeMat());
         for (int i = 0; i < l.getSizeMat(); i++) {
             for (int j = 0; j < l.getSizeMat(); j++) {

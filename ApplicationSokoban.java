@@ -23,7 +23,7 @@ public class ApplicationSokoban {
             case "classique":
                 jeuClassique(data, args[1]);
                 break;
-            case "récursive":
+            case "recursive":
                 jeuRecursive(data, args[1]);
                 break;
             default:

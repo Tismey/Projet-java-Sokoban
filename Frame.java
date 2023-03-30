@@ -119,6 +119,7 @@ public class Frame extends JFrame implements KeyListener {
             };
 
             public void keyPressed(KeyEvent e) {
+                playerWorld = univ.getPlayerSpawnWorld();
                 switch (e.getKeyCode()) {
                     case KeyEvent.VK_LEFT:
                         /* On récupére un numéro de monde */
