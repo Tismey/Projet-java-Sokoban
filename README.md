@@ -26,11 +26,13 @@ inclus dans se repertoire sont:
 
     option pour <param1>:
         -"classique"
-        -"récursive"
+        -"recursive"
+       
+    option pour <param2>:
         -"ascii"
         -"graphique"
-    
-    option pour <param2>
+        
+    option pour <param3>:
         - vous devez écrire le chemin du niveaux que vous voulez ouvrire (chemin relatif) ex: "FichierNiveauxPerso/nivClassique"
 
 ## CONTROLE ##

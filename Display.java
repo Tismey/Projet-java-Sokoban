@@ -50,7 +50,7 @@ public class Display extends JPanel {
         Dimension d = this.getSize();
         int ofx =(int) d.getWidth()/2 - (l.getSizeMat()/2)* images.get(0).getWidth(null) ;
         int ofy =(int) d.getHeight()/2 - (l.getSizeMat()/2) * images.get(0).getHeight(null);
-        g.drawRect(0, 0,ofx + images.get(0).getWidth(null) * l.getSizeMat(),ofy + images.get(0).getHeight(null) * l.getSizeMat());
+        g.drawRect(ofx, ofy,images.get(0).getWidth(null) * l.getSizeMat(), images.get(0).getHeight(null) * l.getSizeMat());
         for (int i = 0; i < l.getSizeMat(); i++) {
             for (int j = 0; j < l.getSizeMat(); j++) {
                 if (l.getLevelData(i, j) == Cells.BOITE)
@@ -61,7 +61,7 @@ public class Display extends JPanel {
                     if (!l.isAPlayerWorld(i, j)) {
                         g.drawImage(images.get(2), ofx + j * images.get(2).getWidth(null), ofy + i * images.get(2).getHeight(null), null);
                     }
-                    else {
+                    else if(u!= null) {
                         LevelMove l2 = u.getUnivers().get(LevelData.getNumPlayerWorld());
                         for (int t = 0; t < l2.getSizeMat();t++) {
                             for (int r = 0; r < l2.getSizeMat(); r++) {
@@ -81,7 +81,7 @@ public class Display extends JPanel {
                 }
                 else if (l.getListTarget().contains(new CoordSet(i, j)) && !l.isAWorld(i, j))
                     g.drawImage(images.get(3), ofx +j * images.get(3).getWidth(null),ofy + i * images.get(3).getHeight(null), null);
-                else if (l.getLevelData(i, j) >= 0){
+                else if (l.getLevelData(i, j) >= 0 && u!= null){
                         g.drawRect(ofx +j * images.get(2).getWidth(null),ofy + i * images.get(3).getHeight(null), images.get(0).getWidth(null), images.get(0).getHeight(null));
                         g.setColor(Color.DARK_GRAY);
                         g.fillRect(ofx +j * images.get(2).getWidth(null),ofy + i * images.get(3).getHeight(null), images.get(0).getWidth(null), images.get(0).getHeight(null));
