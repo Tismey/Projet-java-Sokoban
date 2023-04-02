@@ -241,12 +241,14 @@ public class Univers {
 
 		/* Si c'est un monde et qu'un mouvement est potentiellement possible dans le niveau courant */
 		if (l.isAWorld(o.getX(), o.getY()) && checkPockableMovePossible(new CoordSet(o.getX(), o.getY()), CoordSet.revDirection(d), l, l)) {
+			tmpCoord = new CoordSet(o.getX(), o.getY());
 			/* Si le monde peut bouger pas de poussette possible */
-			if (checkMovePossible(o, d, l)) {
-				o.addToCoordWithDir(d);
-				return getLevelPockableMove(o, d, l, lCrte, cRes);
+			while (!l.onEdge(tmpCoord, d)) {
+				tmpCoord.addToCoordWithDir(d);
+				if (tmpMat[tmpCoord.getX()][tmpCoord.getY()] == Cells.VIDE)
+					return -1;
 			}
-			/* On change les coordonnées de cRes avec celle correspondant à l'entrée de ce niveau par la direction d */
+			/* Sinon on change les coordonnées de cRes avec celle correspondant à l'entrée de ce niveau par la direction d */
 			cRes.chgCoord(l.enterPos(d).getX(), l.enterPos(d).getY());
 			lRes = l.getWorldNum();
 			return lRes;
